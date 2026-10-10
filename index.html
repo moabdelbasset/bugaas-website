@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Bugaa's cheesecake bites and whole cheesecakes, baked to order. Order on WhatsApp.">
+<link rel="icon" type="image/png" href="images/logo-brown.png">
+<title>Bugaa's Cheesecake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Josefin+Sans:wght@400;600&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+html{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}body{margin:0}
+/* Layout: banner-style cream sheets with chocolate/rose corner waves (from the packaging), menu of three boxes, WhatsApp order slip */
+:root{
+  --bg:#F7EDE2;          /* cream, the banner and box ground */
+  --paper:#FCF6EF;       /* lighter card stock */
+  --ink:#4A2414;         /* chocolate, logo colour */
+  --ink-soft:#7A5243;
+  --mocha:#7A4537;       /* dark wave */
+  --rose:#C9907F;        /* rose wave */
+  --rose-soft:#EBCDC2;
+  --line:#E4D1C3;
+  --btn:#5C2A16; --btn-fg:#F7EDE2;
+  --wa:#1F8A4C;
+  --f-display:"Shrikhand", "Georgia", serif;
+  --f-label:"Josefin Sans", "Futura", "Century Gothic", sans-serif;
+  --f-body:"Nunito", "Segoe UI", system-ui, sans-serif;
+  --r:18px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#3A1D12; --paper:#46251A; --ink:#F7EDE2; --ink-soft:#D9BFB1; --mocha:#5E3122; --rose:#B87E6E; --rose-soft:#6B3C2D;
+  --line:#5A3426; --btn:#F7EDE2; --btn-fg:#4A2414; --wa:#3DBE72; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#3A1D12; --paper:#46251A; --ink:#F7EDE2; --ink-soft:#D9BFB1; --mocha:#5E3122; --rose:#B87E6E; --rose-soft:#6B3C2D;
+  --line:#5A3426; --btn:#F7EDE2; --btn-fg:#4A2414; --wa:#3DBE72; color-scheme:dark }
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.6 var(--f-body);padding-inline:0}
+img{max-width:100%;display:block}
+a{color:inherit}
+.wrap{max-width:1140px;margin:0 auto;padding-inline:20px}
+.label{font:600 .78rem/1.2 var(--f-label);letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft)}
+h1,h2,h3{text-wrap:balance;margin:0}
+h2{font:400 clamp(2rem,4.4vw,3rem)/1.1 var(--f-display);color:var(--ink)}
+h3{font:800 1.2rem/1.25 var(--f-body)}
+p{margin:0}
+:focus-visible{outline:3px solid var(--rose);outline-offset:3px;border-radius:6px}
+
+/* logo swaps with theme */
+.logo-dark{display:none}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .logo-light{display:none} :root:not([data-theme="light"]) .logo-dark{display:block} }
+:root[data-theme="dark"] .logo-light{display:none}
+:root[data-theme="dark"] .logo-dark{display:block}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.55em;border:0;cursor:pointer;text-decoration:none;
+  font:800 1rem/1 var(--f-body);padding:.95em 1.5em;border-radius:999px;background:var(--btn);color:var(--btn-fg);transition:transform .15s, box-shadow .15s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 0 -2px var(--rose)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.btn.ghost:hover{box-shadow:inset 0 0 0 2px var(--ink),0 6px 0 -2px var(--rose)}
+.btn.wa{background:var(--wa);color:#fff}
+.btn svg{width:1.2em;height:1.2em;flex:none}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;gap:24px;padding-block:12px}
+header.top .brand img{height:44px;width:auto}
+header.top nav{display:flex;gap:22px;margin-left:auto}
+header.top nav a{text-decoration:none;font:600 .8rem var(--f-label);letter-spacing:.18em;text-transform:uppercase}
+header.top nav a:hover{color:var(--mocha)}
+.cartpill{font:800 .9rem var(--f-body);padding:.6em 1.1em}
+.cartpill .n{background:var(--rose);color:#fff;border-radius:999px;min-width:1.6em;padding:.15em .45em;font-size:.8rem;font-variant-numeric:tabular-nums}
+@media (max-width:760px){header.top nav{display:none} .cartpill{margin-left:auto}}
+
+/* waves: the corner shapes from the banner */
+.sheet{position:relative;overflow:hidden;isolation:isolate}
+.wave{position:absolute;z-index:-1;pointer-events:none;width:clamp(180px,30vw,380px);height:auto}
+.wave .a{fill:var(--rose)} .wave .b{fill:var(--mocha)}
+.wave.tr{top:-2px;right:-2px}
+.wave.bl{bottom:-2px;left:-2px;transform:rotate(180deg)}
+
+/* hero */
+.hero{padding-block:56px 72px}
+.hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}
+.hero .copy{display:grid;gap:22px;min-width:0}
+.hero .logo-big{width:min(440px,90%);height:auto}
+.hero .lede{font-size:1.2rem;max-width:30ch;color:var(--ink-soft)}
+.hero .lede b{color:var(--ink)}
+.hero .ctas{display:flex;flex-wrap:wrap;gap:12px}
+.hero figure{margin:0;border-radius:28px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(74,36,20,.55);transform:rotate(1.5deg);max-width:100%}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:4px}
+.facts span{font:600 .74rem var(--f-label);letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft)}
+.facts span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--rose);margin-right:8px;vertical-align:1px}
+@media (max-width:860px){.hero .wrap{grid-template-columns:1fr}.hero figure{transform:none}.hero{padding-block:32px 56px}}
+
+/* flavours */
+.flavours{background:var(--paper);border-block:1px solid var(--line);padding-block:56px}
+.flavours .head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px;margin-bottom:32px}
+.flist{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;list-style:none;padding:0;margin:0}
+.flist li{display:grid;gap:10px;justify-items:center;text-align:center}
+.flist img{width:100%;max-width:150px;aspect-ratio:1;object-fit:cover;border-radius:50%;border:5px solid var(--bg);box-shadow:0 0 0 2px var(--rose-soft)}
+.flist h3{font-size:1.02rem}
+.flist p{font-size:.9rem;color:var(--ink-soft);max-width:22ch}
+@media (max-width:860px){.flist{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:520px){.flist{grid-template-columns:repeat(2,1fr)}}
+
+/* menu */
+.menu{padding-block:72px}
+.menu .head{display:grid;gap:10px;margin-bottom:36px;max-width:60ch}
+.menu .head p{color:var(--ink-soft)}
+.products{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.product{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.product .ph{aspect-ratio:4/3;overflow:hidden;background:var(--rose-soft)}
+.product .ph img{width:100%;height:100%;object-fit:cover}
+.product .body{padding:22px;display:flex;flex-direction:column;gap:14px;flex:1}
+.product .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.price{font:400 1.6rem/1 var(--f-display);font-variant-numeric:tabular-nums;white-space:nowrap}
+.product p.desc{color:var(--ink-soft);font-size:.96rem}
+.chip{align-self:flex-start;font:600 .72rem var(--f-label);letter-spacing:.2em;text-transform:uppercase;border:1.5px solid var(--ink);border-radius:999px;padding:.45em .9em .3em}
+.field{display:grid;gap:6px}
+.field label,.field legend{font:600 .72rem var(--f-label);letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft)}
+select,input,textarea{font:600 1rem var(--f-body);color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:.7em .8em;width:100%}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--rose);box-shadow:0 0 0 3px var(--rose-soft)}
+.buy{margin-top:auto;display:flex;gap:10px;align-items:center}
+.stepper{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:999px;background:var(--bg)}
+.stepper button{width:40px;height:44px;border:0;background:none;color:var(--ink);font:800 1.2rem var(--f-body);cursor:pointer;border-radius:999px}
+.stepper output{min-width:1.6em;text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
+.buy .btn{flex:1;padding-inline:1em}
+@media (max-width:900px){.products{grid-template-columns:1fr 1fr}}
+@media (max-width:620px){.products{grid-template-columns:1fr}}
+
+/* how */
+.how{background:var(--ink);color:var(--bg);padding-block:64px}
+.how h2{color:var(--bg)}
+.how .label{color:var(--rose-soft)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;list-style:none;padding:0;margin:32px 0 0;counter-reset:s}
+.steps li{display:grid;gap:8px;counter-increment:s}
+.steps li::before{content:counter(s);font:400 2.6rem/1 var(--f-display);color:var(--rose)}
+.steps h3{color:var(--bg)}
+.steps p{opacity:.85}
+@media (max-width:760px){.steps{grid-template-columns:1fr}}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .how{background:var(--mocha);color:var(--ink)} :root:not([data-theme="light"]) .how h2,:root:not([data-theme="light"]) .how h3{color:var(--ink)} }
+:root[data-theme="dark"] .how{background:var(--mocha);color:var(--ink)}
+:root[data-theme="dark"] .how h2,:root[data-theme="dark"] .how h3{color:var(--ink)}
+
+/* order slip */
+.order{padding-block:72px 96px}
+.order .grid{display:grid;grid-template-columns:1fr 1.05fr;gap:40px;align-items:start}
+.order .intro{display:grid;gap:14px;min-width:0}
+.order .intro p{color:var(--ink-soft);max-width:44ch}
+.slip{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:28px;display:grid;gap:20px;min-width:0;position:relative}
+.slip::before{content:"";position:absolute;inset:-1px -1px auto;height:10px;border-radius:24px 24px 0 0;background:linear-gradient(90deg,var(--mocha) 0 40%,var(--rose) 40% 70%,var(--rose-soft) 70%)}
+.lines{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.lines li{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+.lines .nm{font-weight:800;min-width:0}
+.lines .nm small{display:block;font-weight:600;color:var(--ink-soft);font-size:.86rem}
+.lines .amt{font-variant-numeric:tabular-nums;font-weight:800}
+.lines .rm{border:0;background:none;color:var(--ink-soft);cursor:pointer;font:700 .85rem var(--f-body);text-decoration:underline;padding:4px}
+.empty{color:var(--ink-soft);text-align:center;padding:18px;border:1.5px dashed var(--line);border-radius:14px}
+.total{display:flex;justify-content:space-between;align-items:baseline}
+.total .price{font-size:2rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:520px){.two{grid-template-columns:1fr}}
+fieldset{border:0;padding:0;margin:0}
+.seg{display:flex;gap:8px}
+.seg label{flex:1;cursor:pointer}
+.seg input{position:absolute;opacity:0;width:1px;height:1px}
+.seg span{display:block;text-align:center;padding:.7em;border-radius:12px;border:1.5px solid var(--line);font:700 .95rem var(--f-body);color:var(--ink);text-transform:none;letter-spacing:0;background:var(--bg)}
+.seg input:checked + span{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg input:focus-visible + span{outline:3px solid var(--rose);outline-offset:2px}
+.note{font-size:.86rem;color:var(--ink-soft)}
+.note b{font-variant-numeric:tabular-nums;color:var(--ink);user-select:all}
+@media (max-width:860px){.order .grid{grid-template-columns:1fr}}
+
+/* footer */
+footer{border-top:1px solid var(--line);padding-block:40px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:20px 40px;align-items:center;justify-content:space-between}
+footer img{height:40px;width:auto}
+footer p{color:var(--ink-soft);font-size:.9rem}
+
+/* mobile order bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);display:none;align-items:center;gap:12px}
+.bar.show{display:flex}
+.bar span{font-weight:800;font-variant-numeric:tabular-nums}
+.bar .btn{margin-left:auto;background:var(--rose);color:#fff;padding:.75em 1.2em}
+@media (min-width:861px){.bar.show{display:none}}
+.toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);opacity:0;background:var(--ink);color:var(--bg);padding:.7em 1.2em;border-radius:999px;font-weight:700;z-index:40;transition:.25s;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="wave" viewBox="0 0 400 300">
+      <path style="fill:var(--rose)" d="M400 0V300C360 296 330 262 318 222C304 176 270 160 226 150C176 139 150 108 146 66C143 34 120 8 92 0Z"/>
+      <path style="fill:var(--mocha)" d="M400 0V214C372 210 352 188 346 160C338 124 310 108 276 100C240 92 222 66 222 36C222 18 214 6 204 0Z"/>
+    </symbol>
+    <symbol id="wa" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.8-1.2.2-.6.2-1.1.1-1.2l-.5-.3Z"/></symbol>
+  </defs>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Bugaa's home">
+      <img class="logo-light" src="images/logo-brown.png" alt="Bugaa's">
+      <img class="logo-dark" src="images/logo-cream.png" alt="Bugaa's">
+    </a>
+    <nav aria-label="Main">
+      <a href="#flavours">Flavours</a>
+      <a href="#menu">Menu</a>
+      <a href="#how">How it works</a>
+    </nav>
+    <a class="btn cartpill" href="#order">Your order <span class="n" id="cartCount">0</span></a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero sheet">
+    <svg class="wave tr" aria-hidden="true"><use href="#wave"/></svg>
+    <svg class="wave bl" aria-hidden="true"><use href="#wave"/></svg>
+    <div class="wrap">
+      <div class="copy">
+        <span class="label">Cloud kitchen · Cheesecake only</span>
+        <img class="logo-big logo-light" src="images/logo-brown.png" alt="Bugaa's">
+        <img class="logo-big logo-dark" src="images/logo-cream.png" alt="Bugaa's">
+        <p class="lede">Creamy cheesecake bites and whole cakes, <b>baked to order</b> and boxed up for you. Pick your box, send it on WhatsApp, and we'll confirm.</p>
+        <div class="ctas">
+          <a class="btn" href="#menu">See the menu</a>
+          <a class="btn ghost" href="#how">How ordering works</a>
+        </div>
+        <div class="facts"><span>Made fresh</span><span>Pickup or delivery</span><span>Order 48h ahead</span></div>
+      </div>
+      <figure><img src="images/bites.jpg" alt="Two Bugaa's boxes of cheesecake bites, 8 and 16 pieces, showing Biscoff, chocolate, pecan caramel and black cherry bites" width="1000" height="750"></figure>
+    </div>
+  </section>
+
+  <section class="flavours" id="flavours">
+    <div class="wrap">
+      <div class="head">
+        <div style="display:grid;gap:8px"><span class="label">The line-up</span><h2>Five flavours</h2></div>
+        <p class="note">Every bite sits on a buttery biscuit base.</p>
+      </div>
+      <ul class="flist">
+        <li><img src="images/biscoff.jpg" alt="Biscoff cheesecake bite"><h3>Lotus Biscoff</h3><p>Caramelised biscuit, crumble and a whole cookie on top.</p></li>
+        <li><img src="images/choco.jpg" alt="Chocolate crunch cheesecake bite"><h3>Chocolate Crunch</h3><p>Milk chocolate drizzle, wafer pieces and crispy pearls.</p></li>
+        <li><img src="images/pecan.jpg" alt="Pecan caramel cheesecake bite"><h3>Pecan Caramel</h3><p>Salted caramel glaze with toasted pecans.</p></li>
+        <li><img src="images/berry.jpg" alt="Black cherry crumble cheesecake bite"><h3>Black Cherry</h3><p>Glossy cherry compote and a cinnamon crumble.</p></li>
+        <li><img src="images/classic.jpg" alt="Classic crumble cheesecake bite"><h3>Classic Crumble</h3><p>Vanilla cheesecake, brown-sugar crumble. Simple and good.</p></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="menu" id="menu">
+    <div class="wrap">
+      <div class="head">
+        <span class="label">Menu</span>
+        <h2>Pick your box</h2>
+        <p>Add what you like to your order, then send it to us on WhatsApp. Nothing is paid online.</p>
+      </div>
+      <div class="products" id="products"></div>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <div class="wrap">
+      <span class="label">How it works</span>
+      <h2>Ordering takes a minute</h2>
+      <ol class="steps">
+        <li><h3>Build your order</h3><p>Choose boxes and flavours, then add your name and pickup or delivery date.</p></li>
+        <li><h3>Send it on WhatsApp</h3><p>The button opens WhatsApp with your full order already written out. Just press send.</p></li>
+        <li><h3>We confirm and bake</h3><p>We reply to confirm the time and payment, then bake your cheesecake fresh.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="order sheet" id="order">
+    <svg class="wave tr" aria-hidden="true"><use href="#wave"/></svg>
+    <div class="wrap grid">
+      <div class="intro">
+        <span class="label">Your order</span>
+        <h2>Almost there</h2>
+        <p>Check your box, fill in a few details and tap the green button. WhatsApp opens with the message ready to send to Bugaa's.</p>
+        <p class="note">Prefer to message yourself? Our WhatsApp number is <b id="waNumberText"></b></p>
+      </div>
+      <form class="slip" id="orderForm" novalidate>
+        <ul class="lines" id="lines"></ul>
+        <div class="total"><span class="label">Total</span><span class="price" id="total">EGP 0</span></div>
+        <div class="field"><label for="name">Your name</label><input id="name" name="name" autocomplete="name" placeholder="e.g. Sara"></div>
+        <fieldset class="field">
+          <legend>Pickup or delivery</legend>
+          <div class="seg">
+            <label><input type="radio" name="method" id="m-pickup" value="Pickup" checked><span>Pickup</span></label>
+            <label><input type="radio" name="method" id="m-delivery" value="Delivery"><span>Delivery</span></label>
+          </div>
+        </fieldset>
+        <div class="field" id="addrField" hidden><label for="address">Delivery address</label><input id="address" name="address" autocomplete="street-address" placeholder="Street, number, postcode, city"></div>
+        <div class="two">
+          <div class="field"><label for="date">Date</label><input type="date" id="date" name="date"></div>
+          <div class="field"><label for="time">Time</label>
+            <select id="time" name="time"><option>Morning (10–12)</option><option selected>Afternoon (12–17)</option><option>Evening (17–20)</option></select></div>
+        </div>
+        <div class="field"><label for="notes">Notes</label><textarea id="notes" name="notes" rows="2" placeholder="Birthday message, allergies, anything we should know"></textarea></div>
+        <button class="btn wa" id="sendBtn" type="submit"><svg aria-hidden="true"><use href="#wa"/></svg>Send order on WhatsApp</button>
+        <p class="note" id="formMsg" role="status"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <img class="logo-light" src="images/logo-brown.png" alt="Bugaa's">
+    <img class="logo-dark" src="images/logo-cream.png" alt="Bugaa's">
+    <p>Cheesecake cloud kitchen. Orders by WhatsApp only, no walk-ins.</p>
+    <a class="btn wa" id="footerWa" href="#" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#wa"/></svg>Chat with us</a>
+  </div>
+</footer>
+
+<div class="bar" id="bar"><span id="barText">0 items</span><a class="btn" href="#order">Review order</a></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ===== Settings: change these ===== */
+const WHATSAPP_NUMBER = "201000000000";  // international format, digits only: 20 + mobile number without the leading 0
+const CURRENCY = "EGP";
+const FLAVOURS = ["Lotus Biscoff","Chocolate Crunch","Pecan Caramel","Black Cherry","Classic Crumble"];
+const PRODUCTS = [
+  { id:"bites8",  name:"Cheesecake Bites", size:"Box of 8",  price:350, img:"images/bites.jpg", chip:"Most ordered",
+    desc:"Eight bites, two of each flavour you pick. Or let us mix all five.", options:["Mixed box", ...FLAVOURS] },
+  { id:"bites16", name:"Cheesecake Bites", size:"Box of 16", price:650, img:"images/bag.jpg", chip:"For sharing",
+    desc:"Sixteen bites for parties, the office or a very good evening.", options:["Mixed box", ...FLAVOURS] },
+  { id:"whole",   name:"Whole Cheesecake", size:"20 cm · 10 slices", price:900, img:"images/cake.jpg", chip:"Celebrations",
+    desc:"A full baked cheesecake with your choice of topping. Order 48 hours ahead.", options:FLAVOURS },
+];
+/* ================================== */
+
+const fmt = n => CURRENCY + " " + n.toLocaleString("en-US");
+const $ = s => document.querySelector(s);
+const prettyNum = "+" + WHATSAPP_NUMBER.replace(/^(20)(\d{2})(\d{4})(\d+)$/, "$1 $2 $3 $4");
+$("#waNumberText").textContent = prettyNum;
+$("#footerWa").href = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("Hi Bugaa's! I have a question about ordering.");
+
+let cart = [];
+try { cart = JSON.parse(localStorage.getItem("bugaas-cart") || "[]"); } catch(e) { cart = []; }
+const save = () => { try { localStorage.setItem("bugaas-cart", JSON.stringify(cart)); } catch(e) {} };
+
+// products
+const wrap = $("#products");
+PRODUCTS.forEach(p => {
+  const el = document.createElement("article");
+  el.className = "product";
+  el.innerHTML = `
+    <div class="ph"><img src="${p.img}" alt="${p.name}, ${p.size}" loading="lazy"></div>
+    <div class="body">
+      <span class="chip">${p.chip}</span>
+      <div class="row"><h3>${p.name}<br><span class="label">${p.size}</span></h3><span class="price">${fmt(p.price)}</span></div>
+      <p class="desc">${p.desc}</p>
+      <div class="field"><label for="opt-${p.id}">Flavour</label>
+        <select id="opt-${p.id}">${p.options.map(o=>`<option>${o}</option>`).join("")}</select></div>
+      <div class="buy">
+        <div class="stepper" role="group" aria-label="Quantity">
+          <button type="button" data-d="-1" aria-label="One less">−</button>
+          <output id="q-${p.id}">1</output>
+          <button type="button" data-d="1" aria-label="One more">+</button>
+        </div>
+        <button type="button" class="btn add">Add to order</button>
+      </div>
+    </div>`;
+  const q = el.querySelector("output");
+  el.querySelectorAll(".stepper button").forEach(b => b.onclick = () => {
+    q.textContent = Math.max(1, Math.min(20, +q.textContent + +b.dataset.d));
+  });
+  el.querySelector(".add").onclick = () => {
+    const flavour = el.querySelector("select").value, qty = +q.textContent;
+    const hit = cart.find(i => i.id === p.id && i.flavour === flavour);
+    hit ? hit.qty += qty : cart.push({ id:p.id, flavour, qty });
+    q.textContent = 1; save(); render();
+    toast(`Added ${qty} × ${p.name} (${p.size})`);
+  };
+  wrap.appendChild(el);
+});
+
+function render(){
+  const lines = $("#lines"); lines.innerHTML = "";
+  let total = 0, count = 0;
+  cart.forEach((i, idx) => {
+    const p = PRODUCTS.find(x => x.id === i.id); if (!p) return;
+    const amt = p.price * i.qty; total += amt; count += i.qty;
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="nm">${i.qty} × ${p.name}<small>${p.size} · ${i.flavour}</small></span><span class="amt">${fmt(amt)}</span><button type="button" class="rm" aria-label="Remove ${p.name}">Remove</button>`;
+    li.querySelector(".rm").onclick = () => { cart.splice(idx,1); save(); render(); };
+    lines.appendChild(li);
+  });
+  if (!cart.length) lines.innerHTML = `<li class="empty" style="display:block">Your box is empty. <a href="#menu">Pick something from the menu</a>.</li>`;
+  $("#total").textContent = fmt(total);
+  $("#cartCount").textContent = count;
+  $("#barText").textContent = `${count} item${count===1?"":"s"} · ${fmt(total)}`;
+  $("#bar").classList.toggle("show", count > 0);
+  $("#sendBtn").disabled = !cart.length;
+  return total;
+}
+render();
+
+// delivery toggle
+document.querySelectorAll('input[name="method"]').forEach(r => r.onchange = () => {
+  $("#addrField").hidden = !$("#m-delivery").checked;
+});
+
+// earliest date = 2 days out
+const d = new Date(); d.setDate(d.getDate()+2);
+$("#date").min = d.toISOString().slice(0,10);
+
+$("#orderForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const msg = $("#formMsg");
+  const name = $("#name").value.trim();
+  const method = document.querySelector('input[name="method"]:checked').value;
+  const address = $("#address").value.trim();
+  if (!cart.length) { msg.textContent = "Add at least one box from the menu first."; return; }
+  if (!name) { msg.textContent = "Add your name so we know who the order is for."; $("#name").focus(); return; }
+  if (method === "Delivery" && !address) { msg.textContent = "Add a delivery address, or switch to pickup."; $("#address").focus(); return; }
+
+  const total = render();
+  const lines = cart.map(i => { const p = PRODUCTS.find(x=>x.id===i.id);
+    return `• ${i.qty} × ${p.name} – ${p.size} (${i.flavour}) – ${fmt(p.price*i.qty)}`; });
+  const date = $("#date").value ? new Date($("#date").value).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}) : "As soon as possible";
+  const text = [
+    "Hi Bugaa's! I'd like to order:", "", ...lines, "", `Total: ${fmt(total)}`, "",
+    `Name: ${name}`, `${method}: ${date}, ${$("#time").value}`,
+    method === "Delivery" ? `Address: ${address}` : null,
+    $("#notes").value.trim() ? `Notes: ${$("#notes").value.trim()}` : null
+  ].filter(x => x !== null).join("\n");
+
+  const url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(text);
+  const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener";
+  document.body.appendChild(a); a.click(); a.remove();
+  msg.textContent = "WhatsApp should open with your order. If it didn't, message us on " + prettyNum + ".";
+});
+
+let tt;
+function toast(t){ const el=$("#toast"); el.textContent=t; el.classList.add("on"); clearTimeout(tt); tt=setTimeout(()=>el.classList.remove("on"),1800); }
+</script>
+
+</body>
+</html>
