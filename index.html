@@ -88,7 +88,8 @@ header.top nav a:hover{color:var(--mocha)}
 .hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}
 .hero .copy{display:grid;gap:22px;min-width:0}
 .hero .logo-big{width:min(440px,90%);height:auto}
-.hero .lede{font-size:1.2rem;max-width:30ch;color:var(--ink-soft)}
+.hero .tagline{font:400 clamp(1.8rem,3.8vw,2.6rem)/1.15 var(--f-display);color:var(--ink)}
+.hero .lede{font-size:1.15rem;max-width:40ch;color:var(--ink-soft)}
 .hero .lede b{color:var(--ink)}
 .hero .ctas{display:flex;flex-wrap:wrap;gap:12px}
 .hero figure{margin:0;border-radius:28px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(74,36,20,.55);transform:rotate(1.5deg);max-width:100%}
@@ -187,7 +188,6 @@ footer p{color:var(--ink-soft);font-size:.9rem}
 .bar.show{display:flex}
 .bar span{font-weight:800;font-variant-numeric:tabular-nums}
 .bar .btn{margin-left:auto;background:var(--rose);color:#fff;padding:.75em 1.2em}
-@media (min-width:861px){.bar.show{display:none}}
 .toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);opacity:0;background:var(--ink);color:var(--bg);padding:.7em 1.2em;border-radius:999px;font-weight:700;z-index:40;transition:.25s;pointer-events:none}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 </style>
@@ -216,7 +216,6 @@ footer p{color:var(--ink-soft);font-size:.9rem}
       <a href="#menu">Menu</a>
       <a href="#how">How it works</a>
     </nav>
-    <a class="btn cartpill" href="#order">Your order <span class="n" id="cartCount">0</span></a>
   </div>
 </header>
 
@@ -226,12 +225,13 @@ footer p{color:var(--ink-soft);font-size:.9rem}
     <svg class="wave bl" aria-hidden="true"><use href="#wave"/></svg>
     <div class="wrap">
       <div class="copy">
-        <span class="label">Cloud kitchen · Cheesecake only</span>
+        <span class="label">Cloud kitchen</span>
         <img class="logo-big logo-light" src="images/logo-brown.png" alt="Bugaa's">
         <img class="logo-big logo-dark" src="images/logo-cream.png" alt="Bugaa's">
-        <p class="lede">Creamy cheesecake bites and whole cakes, <b>baked to order</b> and boxed up for you. Pick your box, send it on WhatsApp, and we'll confirm.</p>
+        <h1 class="tagline">Originality in every bite</h1>
+        <p class="lede">We specialise in <b>New York–style cheesecake</b> with its original taste. Browse the menu, pick your favourites, and we'll bake them fresh and deliver them to you, full of love.</p>
         <div class="ctas">
-          <a class="btn" href="#menu">See the menu</a>
+          <a class="btn" href="#menu">Menu</a>
           <a class="btn ghost" href="#how">How ordering works</a>
         </div>
         <div class="facts"><span>Made fresh</span><span>Pickup or delivery</span><span>Order 48h ahead</span></div>
@@ -399,7 +399,6 @@ function render(){
   });
   if (!cart.length) lines.innerHTML = `<li class="empty" style="display:block">Your box is empty. <a href="#menu">Pick something from the menu</a>.</li>`;
   $("#total").textContent = fmt(total);
-  $("#cartCount").textContent = count;
   $("#barText").textContent = `${count} item${count===1?"":"s"} · ${fmt(total)}`;
   $("#bar").classList.toggle("show", count > 0);
   $("#sendBtn").disabled = !cart.length;
