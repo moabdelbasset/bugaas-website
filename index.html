@@ -188,6 +188,7 @@ footer p{color:var(--ink-soft);font-size:.9rem}
 .bar.show{display:flex}
 .bar span{font-weight:800;font-variant-numeric:tabular-nums}
 .bar .btn{margin-left:auto;background:var(--rose);color:#fff;padding:.75em 1.2em}
+@media (min-width:861px){.bar.show{display:none}}
 .toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);opacity:0;background:var(--ink);color:var(--bg);padding:.7em 1.2em;border-radius:999px;font-weight:700;z-index:40;transition:.25s;pointer-events:none}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 </style>
@@ -216,6 +217,7 @@ footer p{color:var(--ink-soft);font-size:.9rem}
       <a href="#menu">Menu</a>
       <a href="#how">How it works</a>
     </nav>
+    <a class="btn cartpill" href="#order">Your order <span class="n" id="cartCount">0</span></a>
   </div>
 </header>
 
@@ -232,7 +234,7 @@ footer p{color:var(--ink-soft);font-size:.9rem}
         <p class="lede">We specialise in <b>New York–style cheesecake</b> with its original taste. Browse the menu, pick your favourites, and we'll bake them fresh and deliver them to you, full of love.</p>
         <div class="ctas">
           <a class="btn" href="#menu">Menu</a>
-          <a class="btn ghost" href="#how">How ordering works</a>
+          <a class="btn ghost" href="#order">Order</a>
         </div>
         <div class="facts"><span>Made fresh</span><span>Pickup or delivery</span><span>Order 48h ahead</span></div>
       </div>
@@ -399,6 +401,7 @@ function render(){
   });
   if (!cart.length) lines.innerHTML = `<li class="empty" style="display:block">Your box is empty. <a href="#menu">Pick something from the menu</a>.</li>`;
   $("#total").textContent = fmt(total);
+  $("#cartCount").textContent = count;
   $("#barText").textContent = `${count} item${count===1?"":"s"} · ${fmt(total)}`;
   $("#bar").classList.toggle("show", count > 0);
   $("#sendBtn").disabled = !cart.length;
