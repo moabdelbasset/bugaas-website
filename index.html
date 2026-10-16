@@ -372,12 +372,12 @@ const WHATSAPP_NUMBER = "201000000000";  // international format, digits only: 2
 const CURRENCY = "EGP";
 const FLAVOURS = ["Lotus Biscoff","Chocolate Crunch","Pecan Caramel","Black Cherry","Classic Crumble"];
 const PRODUCTS = [
-  { id:"slices", name:"Cheesecake Slices", size:"Box of 4 slices", price:350, img:"images/bites.jpg", chip:"Most ordered",
-    desc:"Four generous New York–style slices. Pick one flavour or mix them.", options:["Mixed box", ...FLAVOURS] },
+  { id:"slices", name:"Cheesecake Slices", size:"", price:350, img:"images/bites.jpg", chip:"Most ordered",
+    desc:"", options:["Mixed box", ...FLAVOURS] },
   { id:"bites",  name:"Cheesecake Bites", size:"Box of 16", price:650, img:"images/bag.jpg", chip:"For sharing",
-    desc:"Sixteen bite-sized cheesecakes for parties, the office or a very good evening.", options:["Mixed box", ...FLAVOURS] },
+    desc:"", options:["Mixed box", ...FLAVOURS] },
   { id:"whole",   name:"Whole Cheesecake", size:"20 cm · 10 slices", price:900, img:"images/cake.jpg", chip:"Celebrations",
-    desc:"A full baked cheesecake with your choice of topping. Order 24 hours ahead.", options:FLAVOURS },
+    desc:"", options:FLAVOURS },
 ];
 /* ================================== */
 
@@ -397,11 +397,11 @@ PRODUCTS.forEach(p => {
   const el = document.createElement("article");
   el.className = "product";
   el.innerHTML = `
-    <div class="ph"><img src="${p.img}" alt="${p.name}, ${p.size}" loading="lazy"></div>
+    <div class="ph"><img src="${p.img}" alt="${p.name}${p.size ? ", " + p.size : ""}" loading="lazy"></div>
     <div class="body">
       <span class="chip">${p.chip}</span>
-      <div class="row"><h3>${p.name}<br><span class="label">${p.size}</span></h3><span class="price">${fmt(p.price)}</span></div>
-      <p class="desc">${p.desc}</p>
+      <div class="row"><h3>${p.name}${p.size ? `<br><span class="label">${p.size}</span>` : ""}</h3><span class="price">${fmt(p.price)}</span></div>
+      ${p.desc ? `<p class="desc">${p.desc}</p>` : ""}
       <div class="field"><label for="opt-${p.id}">Flavour</label>
         <select id="opt-${p.id}">${p.options.map(o=>`<option>${o}</option>`).join("")}</select></div>
       <div class="buy">
@@ -422,7 +422,7 @@ PRODUCTS.forEach(p => {
     const hit = cart.find(i => i.id === p.id && i.flavour === flavour);
     hit ? hit.qty += qty : cart.push({ id:p.id, flavour, qty });
     q.textContent = 1; save(); render();
-    toast(`Added ${qty} × ${p.name} (${p.size})`);
+    toast(`Added ${qty} × ${p.name}${p.size ? ` (${p.size})` : ""}`);
     cartBtn.classList.remove("bump"); void cartBtn.offsetWidth; cartBtn.classList.add("bump");
   };
   wrap.appendChild(el);
@@ -435,7 +435,7 @@ function render(){
     const p = PRODUCTS.find(x => x.id === i.id); if (!p) return;
     const amt = p.price * i.qty; total += amt; count += i.qty;
     const li = document.createElement("li");
-    li.innerHTML = `<span class="nm">${i.qty} × ${p.name}<small>${p.size} · ${i.flavour}</small></span><span class="amt">${fmt(amt)}</span><button type="button" class="rm" aria-label="Remove ${p.name}">Remove</button>`;
+    li.innerHTML = `<span class="nm">${i.qty} × ${p.name}<small>${[p.size, i.flavour].filter(Boolean).join(" · ")}</small></span><span class="amt">${fmt(amt)}</span><button type="button" class="rm" aria-label="Remove ${p.name}">Remove</button>`;
     li.querySelector(".rm").onclick = () => { cart.splice(idx,1); save(); render(); };
     lines.appendChild(li);
   });
@@ -456,7 +456,7 @@ function renderDrawer(total){
     const p = PRODUCTS.find(x => x.id === i.id); if (!p) return;
     const li = document.createElement("li"); li.className = "ditem";
     li.innerHTML = `<img src="${p.img}" alt="">
-      <div class="meta"><b>${p.name}</b><small>${p.size} · ${i.flavour}</small>
+      <div class="meta"><b>${p.name}</b><small>${[p.size, i.flavour].filter(Boolean).join(" · ")}</small>
         <div class="qty"><button type="button" data-d="-1" aria-label="One less">−</button><span>${i.qty}</span><button type="button" data-d="1" aria-label="One more">+</button></div></div>
       <div class="side"><span class="amt">${fmt(p.price*i.qty)}</span><button type="button" class="rm2">Remove</button></div>`;
     li.querySelectorAll(".qty button").forEach(b => b.onclick = () => {
@@ -510,7 +510,7 @@ $("#orderForm").addEventListener("submit", e => {
 
   const total = render();
   const lines = cart.map(i => { const p = PRODUCTS.find(x=>x.id===i.id);
-    return `• ${i.qty} × ${p.name} – ${p.size} (${i.flavour}) – ${fmt(p.price*i.qty)}`; });
+    return `• ${i.qty} × ${p.name}${p.size ? ` – ${p.size}` : ""} (${i.flavour}) – ${fmt(p.price*i.qty)}`; });
   const date = $("#date").value ? new Date($("#date").value).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}) : "As soon as possible";
   const text = [
     "Hi Bugaa's! I'd like to order:", "", ...lines, "", `Total: ${fmt(total)}`, "",
