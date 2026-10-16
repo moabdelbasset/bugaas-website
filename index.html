@@ -309,8 +309,7 @@ footer .area svg{width:18px;height:18px;flex:none;margin-top:2px;color:var(--ros
       <div class="intro">
         <span class="label">Your order</span>
         <h2>Almost there</h2>
-        <p>Check your box, fill in a few details and tap the green button. WhatsApp opens with the message ready to send to Bugaa's.</p>
-        <p class="note">Prefer to message yourself? Our WhatsApp number is <b id="waNumberText"></b></p>
+        <p>Check your box and fill in a few details.</p>
       </div>
       <form class="slip" id="orderForm" novalidate>
         <ul class="lines" id="lines"></ul>
@@ -390,7 +389,6 @@ const PRODUCTS = [
 const fmt = n => CURRENCY + " " + n.toLocaleString("en-US");
 const $ = s => document.querySelector(s);
 const prettyNum = "+" + WHATSAPP_NUMBER.replace(/^(20)(\d{2})(\d{4})(\d+)$/, "$1 $2 $3 $4");
-$("#waNumberText").textContent = prettyNum;
 $("#footerWa").href = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("Hi Bugaa's! I have a question about ordering.");
 
 let cart = [];
