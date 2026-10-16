@@ -103,11 +103,11 @@ header.top nav a:hover{color:var(--mocha)}
 .ditem .meta b{font-weight:800}
 .ditem .meta small{opacity:.75;font-size:.85rem}
 .ditem .qty{display:inline-flex;align-items:center;gap:2px;margin-top:6px;border:1px solid var(--drawer-line);border-radius:999px;width:max-content}
-.ditem .qty button{width:32px;height:32px;border:0;background:none;color:inherit;font:800 1.05rem var(--f-body);cursor:pointer;border-radius:999px}
+.ditem .qty button{width:42px;height:42px;border:0;background:none;color:inherit;font:800 1.05rem var(--f-body);cursor:pointer;border-radius:999px}
 .ditem .qty span{min-width:1.4em;text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
 .ditem .side{display:grid;justify-items:end;gap:10px}
 .ditem .amt{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
-.ditem .rm2{border:0;background:none;color:inherit;opacity:.7;text-decoration:underline;font:600 .82rem var(--f-body);cursor:pointer;padding:2px}
+.ditem .rm2{border:0;background:none;color:inherit;opacity:.7;text-decoration:underline;font:600 .82rem var(--f-body);cursor:pointer;padding:10px 4px;margin:-10px -4px}
 .dfoot{padding:20px 24px 24px;border-top:1px solid var(--drawer-line);display:grid;gap:14px}
 .dtotal{display:flex;justify-content:space-between;align-items:baseline;font:600 .85rem var(--f-label);letter-spacing:.2em;text-transform:uppercase}
 .dtotal b{font:800 1.4rem var(--f-body);letter-spacing:0;font-variant-numeric:tabular-nums}
@@ -132,6 +132,7 @@ header.top nav a:hover{color:var(--mocha)}
 .hero .lede b{color:var(--ink)}
 .hero .ctas{display:flex;flex-wrap:wrap;gap:12px}
 .hero figure{margin:0;border-radius:28px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(74,36,20,.55);transform:rotate(1.5deg);max-width:100%}
+.hero figure img{width:100%;height:auto}
 .facts{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:4px}
 .facts span{font:600 .74rem var(--f-label);letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft)}
 .facts span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--rose);margin-right:8px;vertical-align:1px}
@@ -158,6 +159,7 @@ header.top nav a:hover{color:var(--mocha)}
 .product .ph img{width:100%;height:100%;object-fit:cover}
 .product .body{padding:22px;display:flex;flex-direction:column;gap:14px;flex:1}
 .product .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.product .size{margin-top:-8px}
 .price{font:400 1.6rem/1 var(--f-display);font-variant-numeric:tabular-nums;white-space:nowrap}
 .product p.desc{color:var(--ink-soft);font-size:.96rem}
 .chip{align-self:flex-start;font:600 .72rem var(--f-label);letter-spacing:.2em;text-transform:uppercase;border:1.5px solid var(--ink);border-radius:999px;padding:.45em .9em .3em}
@@ -199,13 +201,14 @@ select:focus,input:focus,textarea:focus{outline:none;border-color:var(--rose);bo
 .lines .nm{font-weight:800;min-width:0}
 .lines .nm small{display:block;font-weight:600;color:var(--ink-soft);font-size:.86rem}
 .lines .amt{font-variant-numeric:tabular-nums;font-weight:800}
-.lines .rm{border:0;background:none;color:var(--ink-soft);cursor:pointer;font:700 .85rem var(--f-body);text-decoration:underline;padding:4px}
+.lines .rm{border:0;background:none;color:var(--ink-soft);cursor:pointer;font:700 .85rem var(--f-body);text-decoration:underline;padding:12px 6px;margin:-12px -6px}
 .empty{color:var(--ink-soft);text-align:center;padding:18px;border:1.5px dashed var(--line);border-radius:14px}
 .total{display:flex;justify-content:space-between;align-items:baseline}
 .total .price{font-size:2rem}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:520px){.two{grid-template-columns:1fr}}
-fieldset{border:0;padding:0;margin:0}
+fieldset{border:0;padding:0;margin:0;min-width:0}
+legend{padding:0;margin-bottom:6px}
 .seg{display:flex;gap:8px}
 .seg label{flex:1;cursor:pointer}
 .seg input{position:absolute;opacity:0;width:1px;height:1px}
@@ -236,6 +239,34 @@ footer .area svg{width:18px;height:18px;flex:none;margin-top:2px;color:var(--ros
 .bar span{font-weight:800;font-variant-numeric:tabular-nums}
 .bar .btn{margin-left:auto;background:var(--rose);color:#fff;padding:.75em 1.2em}
 @media (min-width:861px){.bar.show{display:none}}
+@media (max-width:860px){body.has-bar{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}}
+@media (max-width:620px){
+  body{font-size:16px}
+  header.top .wrap{padding-block:8px}
+  header.top .brand img{height:38px}
+  .hero{padding-block:24px 40px}
+  .hero .wrap{gap:28px}
+  .hero .copy{gap:16px}
+  .hero .logo-big{width:min(300px,82%)}
+  .hero .ctas .btn{flex:1;max-width:260px}
+  .hero figure{display:none}
+  .hero .wave.bl{display:none}
+  .bar .btn{min-height:44px}
+  .wave{width:150px}
+  .menu{padding-block:44px}
+  .menu .head{margin-bottom:22px}
+  .products{gap:18px}
+  .product .ph{aspect-ratio:16/10}
+  .product .body{padding:18px;gap:12px}
+  .price{font-size:1.4rem}
+  .order{padding-block:44px 56px}
+  .order .grid{gap:24px}
+  .slip{padding:22px 18px;border-radius:20px}
+  footer{padding-block:32px}
+  .fright{width:100%}
+  .fright .btn.wa{flex:1}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px));width:max-content;max-width:calc(100% - 32px);text-align:center}
+}
 .toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);opacity:0;background:var(--ink);color:var(--bg);padding:.7em 1.2em;border-radius:999px;font-weight:700;z-index:40;transition:.25s;pointer-events:none}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 </style>
@@ -404,7 +435,7 @@ PRODUCTS.forEach(p => {
     <div class="ph"><img src="${p.img}" alt="${p.name}${p.size ? ", " + p.size : ""}" loading="lazy"></div>
     <div class="body">
       <span class="chip">${p.chip}</span>
-      <div class="row"><h3>${p.name}${p.size ? `<br><span class="label">${p.size}</span>` : ""}</h3><span class="price">${fmt(p.price)}</span></div>
+      <div class="row"><h3>${p.name}</h3><span class="price">${fmt(p.price)}</span></div>${p.size ? `<span class="label size">${p.size}</span>` : ""}
       ${p.desc ? `<p class="desc">${p.desc}</p>` : ""}
       <div class="field"><label for="opt-${p.id}">Flavour</label>
         <select id="opt-${p.id}">${p.options.map(o=>`<option>${o}</option>`).join("")}</select></div>
@@ -450,6 +481,7 @@ function render(){
   renderDrawer(total);
   $("#barText").textContent = `${count} item${count===1?"":"s"} · ${fmt(total)}`;
   $("#bar").classList.toggle("show", count > 0);
+  document.body.classList.toggle("has-bar", count > 0);
   $("#sendBtn").disabled = !cart.length;
   return total;
 }
