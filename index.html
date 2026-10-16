@@ -235,7 +235,7 @@ footer p{color:var(--ink-soft);font-size:.9rem}
         <div class="ctas">
           <a class="btn" href="#menu">Menu</a>
         </div>
-        <div class="facts"><span>Made fresh</span><span>Pickup or delivery</span><span>Order 48h ahead</span></div>
+        <div class="facts"><span>Freshly made</span><span>Pickup or delivery</span><span>Order 24h ahead</span></div>
       </div>
       <figure><img src="images/bites.jpg" alt="Two Bugaa's boxes of cheesecake bites, 8 and 16 pieces, showing Biscoff, chocolate, pecan caramel and black cherry bites" width="1000" height="750"></figure>
     </div>
@@ -337,7 +337,7 @@ const PRODUCTS = [
   { id:"bites16", name:"Cheesecake Bites", size:"Box of 16", price:650, img:"images/bag.jpg", chip:"For sharing",
     desc:"Sixteen bites for parties, the office or a very good evening.", options:["Mixed box", ...FLAVOURS] },
   { id:"whole",   name:"Whole Cheesecake", size:"20 cm · 10 slices", price:900, img:"images/cake.jpg", chip:"Celebrations",
-    desc:"A full baked cheesecake with your choice of topping. Order 48 hours ahead.", options:FLAVOURS },
+    desc:"A full baked cheesecake with your choice of topping. Order 24 hours ahead.", options:FLAVOURS },
 ];
 /* ================================== */
 
@@ -413,8 +413,8 @@ document.querySelectorAll('input[name="method"]').forEach(r => r.onchange = () =
   $("#addrField").hidden = !$("#m-delivery").checked;
 });
 
-// earliest date = 2 days out
-const d = new Date(); d.setDate(d.getDate()+2);
+// earliest date = 1 day out
+const d = new Date(); d.setDate(d.getDate()+1);
 $("#date").min = d.toISOString().slice(0,10);
 
 $("#orderForm").addEventListener("submit", e => {
