@@ -210,12 +210,20 @@ select:focus,input:focus,textarea:focus{outline:none;border-color:var(--rose);bo
 fieldset{border:0;padding:0;margin:0;min-width:0}
 legend{padding:0;margin-bottom:6px}
 .seg{display:flex;gap:8px}
-.seg label{flex:1;cursor:pointer}
+.seg label{flex:1;cursor:pointer;display:flex}
 .seg input{position:absolute;opacity:0;width:1px;height:1px}
-.seg span{display:block;text-align:center;padding:.7em;border-radius:12px;border:1.5px solid var(--line);font:700 .95rem var(--f-body);color:var(--ink);text-transform:none;letter-spacing:0;background:var(--bg)}
+.seg span{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:.7em;border-radius:12px;border:1.5px solid var(--line);font:700 .95rem var(--f-body);color:var(--ink);text-transform:none;letter-spacing:0;background:var(--bg)}
 .seg input:checked + span{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .seg input:focus-visible + span{outline:3px solid var(--rose);outline-offset:2px}
 .note{font-size:.86rem;color:var(--ink-soft)}
+.phone{display:flex;align-items:stretch;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);overflow:hidden}
+.phone:focus-within{border-color:var(--rose);box-shadow:0 0 0 3px var(--rose-soft)}
+.phone .cc{display:flex;align-items:center;padding:0 .8em;font-weight:800;color:var(--ink);border-right:1.5px solid var(--line);font-variant-numeric:tabular-nums}
+.phone input{border:0;border-radius:0;background:transparent;min-width:0;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.phone input:focus{box-shadow:none}
+.hint{font-size:.8rem;color:var(--ink-soft)}
+.field.invalid .phone,.field.invalid > input{border-color:#C0392B}
+.btn.checkout{width:100%;padding-block:1.05em;font-size:1.05rem}
 .note b{font-variant-numeric:tabular-nums;color:var(--ink);user-select:all}
 @media (max-width:860px){.order .grid{grid-template-columns:1fr}}
 
@@ -345,7 +353,11 @@ footer .area svg{width:18px;height:18px;flex:none;margin-top:2px;color:var(--ros
       <form class="slip" id="orderForm" novalidate>
         <ul class="lines" id="lines"></ul>
         <div class="total"><span class="label">Total</span><span class="price" id="total">EGP 0</span></div>
-        <div class="field"><label for="name">Your name</label><input id="name" name="name" autocomplete="name" placeholder="e.g. Sara"></div>
+        <div class="field"><label for="name">Name</label><input id="name" name="name" autocomplete="name" placeholder="e.g. Sara"></div>
+        <div class="field"><label for="phone">Phone number</label>
+          <div class="phone"><span class="cc" aria-hidden="true">+20</span><input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="10 1234 5678" maxlength="14" aria-describedby="phoneHint"></div>
+          <small class="hint" id="phoneHint">Egyptian mobile number</small>
+        </div>
         <fieldset class="field">
           <legend>Pickup or delivery</legend>
           <div class="seg">
@@ -353,14 +365,15 @@ footer .area svg{width:18px;height:18px;flex:none;margin-top:2px;color:var(--ros
             <label><input type="radio" name="method" id="m-delivery" value="Delivery"><span>Delivery</span></label>
           </div>
         </fieldset>
-        <div class="field" id="addrField" hidden><label for="address">Delivery address</label><input id="address" name="address" autocomplete="street-address" placeholder="Street, number, postcode, city"></div>
-        <div class="two">
-          <div class="field"><label for="date">Date</label><input type="date" id="date" name="date"></div>
-          <div class="field"><label for="time">Time</label>
-            <select id="time" name="time"><option>Morning (10–12)</option><option selected>Afternoon (12–17)</option><option>Evening (17–20)</option></select></div>
-        </div>
-        <div class="field"><label for="notes">Notes</label><textarea id="notes" name="notes" rows="2" placeholder="Birthday message, allergies, anything we should know"></textarea></div>
-        <button class="btn wa" id="sendBtn" type="submit"><svg aria-hidden="true"><use href="#wa"/></svg>Send order on WhatsApp</button>
+        <div class="field" id="addrField" hidden><label for="address">Delivery address</label><input id="address" name="address" autocomplete="street-address" placeholder="Street, building, apartment, area in New Cairo"></div>
+        <fieldset class="field">
+          <legend>Payment method</legend>
+          <div class="seg">
+            <label><input type="radio" name="payment" id="pay-cash" value="Cash on delivery" checked><span>Cash on delivery</span></label>
+            <label><input type="radio" name="payment" id="pay-instapay" value="InstaPay"><span>InstaPay</span></label>
+          </div>
+        </fieldset>
+        <button class="btn checkout" id="sendBtn" type="submit">Checkout</button>
         <p class="note" id="formMsg" role="status"></p>
       </form>
     </div>
@@ -530,9 +543,14 @@ document.querySelectorAll('input[name="method"]').forEach(r => r.onchange = () =
   $("#addrField").hidden = !$("#m-delivery").checked;
 });
 
-// earliest date = 1 day out
-const d = new Date(); d.setDate(d.getDate()+1);
-$("#date").min = d.toISOString().slice(0,10);
+// Egyptian mobile: accepts 010…, 10…, +2010…, 002010… → returns 10 digits starting with 1, or null
+function egMobile(v){
+  let n = v.replace(/\D/g, "");
+  if (n.startsWith("0020")) n = n.slice(4); else if (n.startsWith("20") && n.length === 12) n = n.slice(2);
+  if (n.startsWith("0")) n = n.slice(1);
+  return /^1[0125]\d{8}$/.test(n) ? n : null;
+}
+$("#phone").addEventListener("input", () => $("#phone").closest(".field").classList.remove("invalid"));
 
 $("#orderForm").addEventListener("submit", e => {
   e.preventDefault();
@@ -542,23 +560,26 @@ $("#orderForm").addEventListener("submit", e => {
   const address = $("#address").value.trim();
   if (!cart.length) { msg.textContent = "Add at least one box from the menu first."; return; }
   if (!name) { msg.textContent = "Add your name so we know who the order is for."; $("#name").focus(); return; }
+  const phone = egMobile($("#phone").value);
+  if (!phone) { msg.textContent = "Enter a valid Egyptian mobile number, for example 010 1234 5678."; $("#phone").closest(".field").classList.add("invalid"); $("#phone").focus(); return; }
   if (method === "Delivery" && !address) { msg.textContent = "Add a delivery address, or switch to pickup."; $("#address").focus(); return; }
+  const payment = document.querySelector('input[name="payment"]:checked').value;
 
   const total = render();
   const lines = cart.map(i => { const p = PRODUCTS.find(x=>x.id===i.id);
     return `• ${i.qty} × ${p.name}${p.size ? ` – ${p.size}` : ""} (${i.flavour}) – ${fmt(p.price*i.qty)}`; });
-  const date = $("#date").value ? new Date($("#date").value).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}) : "As soon as possible";
   const text = [
     "Hi Bugaa's! I'd like to order:", "", ...lines, "", `Total: ${fmt(total)}`, "",
-    `Name: ${name}`, `${method}: ${date}, ${$("#time").value}`,
+    `Name: ${name}`, `Phone: +20 ${phone.replace(/^(\d{2})(\d{4})(\d{4})$/, "$1 $2 $3")}`,
+    `Order type: ${method}`,
     method === "Delivery" ? `Address: ${address}` : null,
-    $("#notes").value.trim() ? `Notes: ${$("#notes").value.trim()}` : null
+    `Payment: ${payment}`
   ].filter(x => x !== null).join("\n");
 
   const url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(text);
   const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener";
   document.body.appendChild(a); a.click(); a.remove();
-  msg.textContent = "WhatsApp should open with your order. If it didn't, message us on " + prettyNum + ".";
+  msg.textContent = "Almost done! Press send in WhatsApp to confirm your order. If WhatsApp didn't open, message us on " + prettyNum + ".";
 });
 
 let tt;
