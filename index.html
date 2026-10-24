@@ -79,6 +79,8 @@ header.top nav a:hover{color:var(--mocha)}
 /* cart button + slide-out cart */
 .cartbtn{margin-left:auto;position:relative;width:48px;height:48px;border-radius:50%;border:0;background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:background .15s}
 .cartbtn:hover{background:var(--rose-soft)}
+.wabtn{color:var(--wa)}
+.wabtn + .cartbtn{margin-left:-18px}
 .cartbtn svg{width:27px;height:27px}
 .cartbtn .n{position:absolute;top:3px;right:1px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--rose);color:#fff;font:800 .72rem/20px var(--f-body);text-align:center;font-variant-numeric:tabular-nums}
 .cartbtn.bump .n{animation:bump .45s ease}
@@ -366,6 +368,7 @@ footer .area svg{width:18px;height:18px;flex:none;margin-top:2px;color:var(--ros
       <img class="logo-light" src="images/logo-brown.png" alt="Bugaa's">
       <img class="logo-dark" src="images/logo-cream.png" alt="Bugaa's">
     </a>
+    <a class="cartbtn wabtn" id="headerWa" href="#" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp" title="Chat with us on WhatsApp"><svg aria-hidden="true"><use href="#wa"/></svg></a>
     <button class="cartbtn" id="cartBtn" type="button" aria-label="Open cart" aria-controls="cartPanel" aria-expanded="false">
       <svg aria-hidden="true"><use href="#cart"/></svg><span class="n" id="cartCount" hidden>0</span>
     </button>
@@ -528,7 +531,8 @@ const sizeOf = (p, i) => i && i.size ? i.size : p.sizes ? "" : p.size;
 const fmt = n => CURRENCY + " " + n.toLocaleString("en-US");
 const $ = s => document.querySelector(s);
 const prettyNum = "+" + WHATSAPP_NUMBER.replace(/^(20)(\d{2})(\d{4})(\d+)$/, "$1 $2 $3 $4");
-$("#footerWa").href = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("Hi Bugaa's! I have a question about ordering.");
+const chatLink = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("Hi Bugaa's! I have a question.");
+$("#footerWa").href = chatLink; $("#headerWa").href = chatLink;
 
 let cart = [];
 try { cart = JSON.parse(localStorage.getItem("bugaas-cart") || "[]"); } catch(e) { cart = []; }
@@ -545,7 +549,7 @@ PRODUCTS.forEach(p => {
     <div class="body">
       <span class="chip">${p.chip}</span>
       <div class="row"><h3>${p.name}</h3><span class="price">${p.sizes ? "From " + fmt(Math.min(...p.sizes.map(s => s.price))) : fmt(p.price)}</span></div>${p.perPiece ? `<span class="label size">Per ${p.unit.replace(/s$/, "")}</span>` : p.size ? `<span class="label size">${p.size}</span>` : ""}
-      <span class="btn cta">${p.perPiece || p.sizes ? "Mix your flavours" : "Choose your flavour"}<svg aria-hidden="true"><use href="#arrow"/></svg></span>
+      <span class="btn cta">${p.perPiece || p.sizes ? "Choose your flavours" : "Choose your flavour"}<svg aria-hidden="true"><use href="#arrow"/></svg></span>
     </div>`;
   wrap.appendChild(el);
 });
@@ -658,7 +662,7 @@ function openProduct(p){
     updateBar();
   });
   const multi = p.perPiece || p.sizes;
-  $("#pvH").textContent = multi ? "Mix your flavours" : "Choose your flavour";
+  $("#pvH").textContent = multi ? "Choose your flavours" : "Choose your flavour";
   $("#pvSub").textContent = multi ? `Tap + to add a ${one(p.unit)} of that flavour.` : "";
   $("#pvSub").hidden = !multi;
   const g = $("#pvGrid"); g.innerHTML = "";
