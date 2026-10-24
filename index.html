@@ -269,7 +269,10 @@ body.viewing .bar{display:none!important}
 .ftile.pick:has(input:focus-visible){outline:3px solid var(--rose);outline-offset:2px}
 .ftile .tick{position:absolute;top:10px;right:10px;z-index:2;width:30px;height:30px;border-radius:50%;display:none;place-items:center;background:var(--ink);color:var(--bg);font-weight:800}
 .ftile.pick:has(input:checked) .tick{display:grid}
-.chefmix{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:24px;color:var(--ink-soft)}
+.pv-sizes{max-width:440px;margin-bottom:36px}
+.pv-sizes legend{font:600 .78rem var(--f-label);letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft)}
+.pv-sizes .seg span{flex-direction:column;gap:2px;padding:.85em .6em;font-size:1.05rem}
+.pv-sizes .seg small{font-weight:600;font-size:.85rem;opacity:.8;font-variant-numeric:tabular-nums}
 .pv-bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--paper);border-top:1px solid var(--line);box-shadow:0 -12px 30px -22px rgba(74,36,20,.45);padding:12px 0 calc(12px + env(safe-area-inset-bottom,0px))}
 .pv-bar .wrap{display:flex;align-items:center;justify-content:flex-end;gap:16px}
 .pv-prog{flex:1;display:grid;gap:7px;min-width:0;font-size:.95rem;color:var(--ink-soft)}
@@ -415,10 +418,10 @@ footer .area svg{width:18px;height:18px;flex:none;margin-top:2px;color:var(--ros
           <p class="pv-lede" id="pvLede"></p>
         </div>
       </div>
+      <fieldset class="field pv-sizes" id="pvSizes" hidden></fieldset>
       <h2 class="pv-h" id="pvH"></h2>
       <p class="pv-sub" id="pvSub"></p>
       <div class="fgrid" id="pvGrid"></div>
-      <div class="chefmix" id="pvChef"><span>Can't decide?</span><button type="button" class="btn ghost" id="pvChefBtn">Let us mix it for you</button></div>
     </div>
     <div class="pv-bar"><div class="wrap" id="pvBar"></div></div>
   </section>
@@ -510,12 +513,16 @@ const FLAVOURS = [
   { name:"Biscoff Butter Crunch", img:"images/flavours/biscoff-butter-crunch.jpg" },
   { name:"Golden Caramel Pecan",  img:"images/flavours/golden-caramel-pecan.jpg" },
 ];
-// mix = pieces per box the customer mixes (0 = one flavour only); step = pieces added per tap
+// perPiece: customer picks any number of pieces, priced per piece
+// sizes: customer picks a box size, then fills it with any mix of flavours
 const PRODUCTS = [
-  { id:"slices", name:"Cheesecake Slices", size:"", price:350, img:"images/bites.jpg", chip:"Most ordered", mix:4, step:1, unit:"slices" },
-  { id:"bites",  name:"Cheesecake Bites", size:"Box of 16", price:650, img:"images/bag.jpg", chip:"For sharing", mix:16, step:2, unit:"bites" },
-  { id:"whole",  name:"Whole Cheesecake", size:"27 cm · Serves up to 10 people", price:900, img:"images/cake.jpg", chip:"Celebrations", mix:0 },
+  { id:"slices", name:"Cheesecake Slices", size:"", price:100, perPiece:true, unit:"slices", img:"images/bites.jpg", chip:"Most ordered" },
+  { id:"bites",  name:"Cheesecake Bites", size:"Box of 4 or 8", unit:"bites", img:"images/bag.jpg", chip:"For sharing",
+    sizes:[ { label:"Box of 4", pieces:4, price:200 }, { label:"Box of 8", pieces:8, price:350 } ] },
+  { id:"whole",  name:"Whole Cheesecake", size:"27 cm · Serves up to 10 people", price:900, img:"images/cake.jpg", chip:"Celebrations" },
 ];
+const priceOf = (p, i) => i && i.price != null ? i.price : p.sizes ? p.sizes[0].price : p.price;
+const sizeOf = (p, i) => i && i.size ? i.size : p.sizes ? "" : p.size;
 /* ================================== */
 
 const fmt = n => CURRENCY + " " + n.toLocaleString("en-US");
@@ -525,6 +532,7 @@ $("#footerWa").href = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIC
 
 let cart = [];
 try { cart = JSON.parse(localStorage.getItem("bugaas-cart") || "[]"); } catch(e) { cart = []; }
+cart = cart.filter(i => { const p = PRODUCTS.find(x => x.id === i.id); return p && (!p.sizes || i.size) && i.flavour !== "Chef's mix"; });
 const save = () => { try { localStorage.setItem("bugaas-cart", JSON.stringify(cart)); } catch(e) {} };
 
 // menu cards: each opens its product page
@@ -536,8 +544,8 @@ PRODUCTS.forEach(p => {
     <div class="ph"><img src="${p.img}" alt="${p.name}${p.size ? ", " + p.size : ""}" loading="lazy"></div>
     <div class="body">
       <span class="chip">${p.chip}</span>
-      <div class="row"><h3>${p.name}</h3><span class="price">${fmt(p.price)}</span></div>${p.size ? `<span class="label size">${p.size}</span>` : ""}
-      <span class="btn cta">${p.mix ? "Mix your flavours" : "Choose your flavour"}<svg aria-hidden="true"><use href="#arrow"/></svg></span>
+      <div class="row"><h3>${p.name}</h3><span class="price">${p.sizes ? "From " + fmt(Math.min(...p.sizes.map(s => s.price))) : fmt(p.price)}</span></div>${p.perPiece ? `<span class="label size">Per ${p.unit.replace(/s$/, "")}</span>` : p.size ? `<span class="label size">${p.size}</span>` : ""}
+      <span class="btn cta">${p.perPiece || p.sizes ? "Mix your flavours" : "Choose your flavour"}<svg aria-hidden="true"><use href="#arrow"/></svg></span>
     </div>`;
   wrap.appendChild(el);
 });
@@ -547,9 +555,9 @@ function render(){
   let total = 0, count = 0;
   cart.forEach((i, idx) => {
     const p = PRODUCTS.find(x => x.id === i.id); if (!p) return;
-    const amt = p.price * i.qty; total += amt; count += i.qty;
+    const amt = priceOf(p, i) * i.qty; total += amt; count += i.qty;
     const li = document.createElement("li");
-    li.innerHTML = `<span class="nm">${i.qty} × ${p.name}<small>${[p.size, i.flavour].filter(Boolean).join(" · ")}</small></span><span class="amt">${fmt(amt)}</span><button type="button" class="rm" aria-label="Remove ${p.name}">Remove</button>`;
+    li.innerHTML = `<span class="nm">${i.qty} × ${p.name}<small>${[sizeOf(p, i), i.flavour].filter(Boolean).join(" · ")}</small></span><span class="amt">${fmt(amt)}</span><button type="button" class="rm" aria-label="Remove ${p.name}">Remove</button>`;
     li.querySelector(".rm").onclick = () => { cart.splice(idx,1); save(); render(); };
     lines.appendChild(li);
   });
@@ -571,9 +579,9 @@ function renderDrawer(total){
     const p = PRODUCTS.find(x => x.id === i.id); if (!p) return;
     const li = document.createElement("li"); li.className = "ditem";
     li.innerHTML = `<img src="${p.img}" alt="">
-      <div class="meta"><b>${p.name}</b><small>${[p.size, i.flavour].filter(Boolean).join(" · ")}</small>
+      <div class="meta"><b>${p.name}</b><small>${[sizeOf(p, i), i.flavour].filter(Boolean).join(" · ")}</small>
         <div class="qty"><button type="button" data-d="-1" aria-label="One less">−</button><span>${i.qty}</span><button type="button" data-d="1" aria-label="One more">+</button></div></div>
-      <div class="side"><span class="amt">${fmt(p.price*i.qty)}</span><button type="button" class="rm2">Remove</button></div>`;
+      <div class="side"><span class="amt">${fmt(priceOf(p, i)*i.qty)}</span><button type="button" class="rm2">Remove</button></div>`;
     li.querySelectorAll(".qty button").forEach(b => b.onclick = () => {
       i.qty += +b.dataset.d; if (i.qty < 1) cart.splice(idx,1); save(); render();
     });
@@ -605,52 +613,77 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && drawer.cla
 /* ---------- product pages (#p-slices, #p-bites, #p-whole) ---------- */
 const CAKE = '<svg viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M6 31 40 17l2 14z"/><path d="M6 31v8h36v-8"/><path d="M6 35h36"/><path d="M33 13c2-3 6-2 6 1"/></g></svg>';
 const fimg = f => `<div class="fimg"><img src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.remove()"><div class="fph" aria-hidden="true">${CAKE}<span>Photo coming soon</span></div></div>`;
-let cur = null, picks = {}, pq = 1;
+let cur = null, picks = {}, pq = 1, box = null;
 const picked = () => Object.values(picks).reduce((a, b) => a + b, 0);
+const one = u => u.replace(/s$/, "");
+
+function stepTile(f, p){
+  const t = document.createElement("div"); t.className = "ftile";
+  t.innerHTML = `${fimg(f)}<div class="fbody"><span class="fname">${f.name}</span>
+    <div class="stepper" role="group" aria-label="${f.name}"><button type="button" data-d="-1" aria-label="Fewer ${f.name}">−</button><output>0</output><button type="button" data-d="1" aria-label="More ${f.name}">+</button></div></div>`;
+  t.querySelectorAll("button").forEach(b => b.onclick = () => {
+    const d = +b.dataset.d, now = picks[f.name] || 0;
+    if (d > 0 && box && picked() + d > box.pieces) { toast(`Your box is full (${box.pieces} ${p.unit})`); return; }
+    if (d > 0 && !box && now >= 50) return;
+    picks[f.name] = Math.max(0, now + d); if (!picks[f.name]) delete picks[f.name];
+    t.querySelector("output").textContent = picks[f.name] || 0;
+    t.classList.toggle("has", !!picks[f.name]);
+    updateBar();
+  });
+  return t;
+}
+
+function resetPicks(){
+  picks = {};
+  $("#pvGrid").querySelectorAll(".ftile").forEach(t => { t.classList.remove("has"); const o = t.querySelector("output"); if (o) o.textContent = 0; });
+}
 
 function openProduct(p){
-  cur = p; picks = {}; pq = 1;
+  cur = p; picks = {}; pq = 1; box = p.sizes ? p.sizes[0] : null;
   $("#pvImg").src = p.img; $("#pvImg").alt = p.name;
   $("#pvChip").textContent = p.chip; $("#pvTitle").textContent = p.name;
-  $("#pvSize").textContent = p.size; $("#pvSize").hidden = !p.size;
-  $("#pvPrice").textContent = fmt(p.price) + (p.mix ? " per box" : "");
-  $("#pvLede").textContent = p.mix ? `Build a box of ${p.mix} ${p.unit}. Mix and match any flavours you like.` : "Choose one flavour for your cheesecake.";
-  $("#pvH").textContent = p.mix ? "Mix your flavours" : "Choose your flavour";
-  $("#pvSub").textContent = p.mix ? `Each tap on + adds ${p.step} ${p.step > 1 ? p.unit : p.unit.replace(/s$/, "")} of that flavour.` : "";
-  $("#pvSub").hidden = !p.mix;
-  $("#pvChef").hidden = !p.mix;
+  $("#pvSize").textContent = p.size; $("#pvSize").hidden = !p.size || !!p.sizes;
+  $("#pvPrice").textContent = p.sizes ? `From ${fmt(Math.min(...p.sizes.map(s => s.price)))}` : fmt(p.price) + (p.perPiece ? ` per ${one(p.unit)}` : "");
+  $("#pvLede").textContent = p.perPiece ? `Choose as many ${p.unit} as you like, in any flavours.`
+    : p.sizes ? `Pick your box size, then mix and match any flavours you like.`
+    : "Choose one flavour for your cheesecake.";
+  // box size picker (bites)
+  const sizes = $("#pvSizes");
+  sizes.hidden = !p.sizes;
+  sizes.innerHTML = p.sizes ? `<legend>Box size</legend><div class="seg">${p.sizes.map((s, i) =>
+    `<label><input type="radio" name="pvBox" value="${i}" ${i === 0 ? "checked" : ""}><span>${s.label}<small>${fmt(s.price)}</small></span></label>`).join("")}</div>` : "";
+  sizes.querySelectorAll("input").forEach(r => r.onchange = () => {
+    box = p.sizes[+r.value];
+    if (picked() > box.pieces) { resetPicks(); toast(`Box of ${box.pieces}: choose your flavours again`); }
+    updateBar();
+  });
+  const multi = p.perPiece || p.sizes;
+  $("#pvH").textContent = multi ? "Mix your flavours" : "Choose your flavour";
+  $("#pvSub").textContent = multi ? `Tap + to add a ${one(p.unit)} of that flavour.` : "";
+  $("#pvSub").hidden = !multi;
   const g = $("#pvGrid"); g.innerHTML = "";
   FLAVOURS.forEach((f, i) => {
-    if (p.mix) {
-      const t = document.createElement("div"); t.className = "ftile";
-      t.innerHTML = `${fimg(f)}<div class="fbody"><span class="fname">${f.name}</span>
-        <div class="stepper" role="group" aria-label="${f.name}"><button type="button" data-d="-1" aria-label="Fewer ${f.name}">−</button><output>0</output><button type="button" data-d="1" aria-label="More ${f.name}">+</button></div></div>`;
-      t.querySelectorAll("button").forEach(b => b.onclick = () => {
-        const d = +b.dataset.d * p.step, now = picks[f.name] || 0;
-        if (d > 0 && picked() + d > p.mix) { toast(`Your box is full (${p.mix} ${p.unit})`); return; }
-        picks[f.name] = Math.max(0, now + d); if (!picks[f.name]) delete picks[f.name];
-        t.querySelector("output").textContent = picks[f.name] || 0;
-        t.classList.toggle("has", !!picks[f.name]);
-        updateBar();
-      });
-      g.appendChild(t);
-    } else {
-      const t = document.createElement("label"); t.className = "ftile pick";
-      t.innerHTML = `<input type="radio" name="pvFlavour" value="${f.name}" ${i === 0 ? "checked" : ""}><span class="tick" aria-hidden="true">✓</span>${fimg(f)}<div class="fbody"><span class="fname">${f.name}</span></div>`;
-      g.appendChild(t);
-    }
+    if (multi) { g.appendChild(stepTile(f, p)); return; }
+    const t = document.createElement("label"); t.className = "ftile pick";
+    t.innerHTML = `<input type="radio" name="pvFlavour" value="${f.name}" ${i === 0 ? "checked" : ""}><span class="tick" aria-hidden="true">✓</span>${fimg(f)}<div class="fbody"><span class="fname">${f.name}</span></div>`;
+    g.appendChild(t);
   });
   const bar = $("#pvBar");
-  bar.innerHTML = p.mix
-    ? `<div class="pv-prog"><span id="pvCount"></span><div class="meter"><i id="pvMeter"></i></div></div><button type="button" class="btn" id="pvAdd">Add box · ${fmt(p.price)}</button>`
+  bar.innerHTML = p.sizes
+    ? `<div class="pv-prog"><span id="pvCount"></span><div class="meter"><i id="pvMeter"></i></div></div><button type="button" class="btn" id="pvAdd"></button>`
+    : p.perPiece
+    ? `<div class="pv-prog"><span id="pvCount"></span></div><button type="button" class="btn" id="pvAdd">Add to cart</button>`
     : `<div class="stepper" role="group" aria-label="Quantity"><button type="button" data-d="-1" aria-label="One less">−</button><output id="pvQty">1</output><button type="button" data-d="1" aria-label="One more">+</button></div><button type="button" class="btn" id="pvAdd"></button>`;
-  if (!p.mix) bar.querySelectorAll(".stepper button").forEach(b => b.onclick = () => { pq = Math.max(1, Math.min(10, pq + +b.dataset.d)); updateBar(); });
+  if (!multi) bar.querySelectorAll(".stepper button").forEach(b => b.onclick = () => { pq = Math.max(1, Math.min(10, pq + +b.dataset.d)); updateBar(); });
   $("#pvAdd").onclick = () => {
-    if (p.mix) {
-      if (picked() < p.mix) { toast(`Add ${p.mix - picked()} more ${p.unit} to fill your box`); return; }
-      addToCart(FLAVOURS.filter(f => picks[f.name]).map(f => `${picks[f.name]}× ${f.name}`).join(", "), 1);
+    if (p.sizes) {
+      if (picked() < box.pieces) { toast(`Add ${box.pieces - picked()} more ${p.unit} to fill your box`); return; }
+      addLines([{ flavour: FLAVOURS.filter(f => picks[f.name]).map(f => `${picks[f.name]}× ${f.name}`).join(", "), qty: 1, size: box.label, price: box.price }]);
+    } else if (p.perPiece) {
+      if (!picked()) { toast(`Tap + to add at least one ${one(p.unit)}`); return; }
+      addLines(FLAVOURS.filter(f => picks[f.name]).map(f => ({ flavour: f.name, qty: picks[f.name] })));
     } else {
-      addToCart(document.querySelector('input[name="pvFlavour"]:checked').value, pq);
+      addLines([{ flavour: document.querySelector('input[name="pvFlavour"]:checked').value, qty: pq }]);
     }
   };
   updateBar();
@@ -658,27 +691,33 @@ function openProduct(p){
 
 function updateBar(){
   if (!cur) return;
-  if (cur.mix) {
-    const n = picked(), full = n === cur.mix;
-    $("#pvCount").innerHTML = full ? "<b>Box complete!</b>" : `<b>${n}</b> / ${cur.mix} ${cur.unit}`;
-    $("#pvMeter").style.width = (n / cur.mix * 100) + "%";
+  const n = picked();
+  if (cur.sizes) {
+    const full = n === box.pieces;
+    $("#pvCount").innerHTML = full ? "<b>Box complete!</b>" : `<b>${n}</b> / ${box.pieces} ${cur.unit}`;
+    $("#pvMeter").style.width = (n / box.pieces * 100) + "%";
+    $("#pvAdd").textContent = `Add box · ${fmt(box.price)}`;
     $("#pvAdd").classList.toggle("muted", !full);
-    $("#pvGrid").querySelectorAll('button[data-d="1"]').forEach(b => b.disabled = n + cur.step > cur.mix);
+    $("#pvGrid").querySelectorAll('button[data-d="1"]').forEach(b => b.disabled = n >= box.pieces);
+  } else if (cur.perPiece) {
+    $("#pvCount").innerHTML = n ? `<b>${n}</b> ${n === 1 ? one(cur.unit) : cur.unit} · <b>${fmt(n * cur.price)}</b>` : `Tap + to add ${cur.unit}`;
+    $("#pvAdd").classList.toggle("muted", !n);
   } else {
     $("#pvQty").textContent = pq;
     $("#pvAdd").textContent = `Add to cart · ${fmt(cur.price * pq)}`;
   }
 }
 
-function addToCart(flavour, qty){
-  const hit = cart.find(i => i.id === cur.id && i.flavour === flavour);
-  hit ? hit.qty += qty : cart.push({ id:cur.id, flavour, qty });
+function addLines(items){
+  items.forEach(it => {
+    const hit = cart.find(i => i.id === cur.id && i.flavour === it.flavour && (i.size || "") === (it.size || ""));
+    hit ? hit.qty += it.qty : cart.push({ id:cur.id, ...it });
+  });
   save(); render();
   cartBtn.classList.remove("bump"); void cartBtn.offsetWidth; cartBtn.classList.add("bump");
   openProduct(cur);
   openCart();
 }
-$("#pvChefBtn").onclick = () => addToCart("Chef's mix", 1);
 
 function route(){
   const h = decodeURIComponent(location.hash.slice(1));
@@ -729,7 +768,8 @@ $("#orderForm").addEventListener("submit", e => {
 
   const total = render();
   const lines = cart.map(i => { const p = PRODUCTS.find(x=>x.id===i.id);
-    return `• ${i.qty} × ${p.name}${p.size ? ` – ${p.size}` : ""} (${i.flavour}) – ${fmt(p.price*i.qty)}`; });
+    const sz = sizeOf(p, i);
+    return `• ${i.qty} × ${p.name}${sz ? ` – ${sz}` : ""} (${i.flavour}) – ${fmt(priceOf(p, i)*i.qty)}`; });
   const text = [
     "Hi Bugaa's! I'd like to order:", "", ...lines, "", `Total: ${fmt(total)}`, "",
     `Name: ${name}`, `Phone: +20 ${phone.replace(/^(\d{2})(\d{4})(\d{4})$/, "$1 $2 $3")}`,
