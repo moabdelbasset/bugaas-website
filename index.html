@@ -216,6 +216,14 @@ legend{padding:0;margin-bottom:6px}
 .seg input:checked + span{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .seg input:focus-visible + span{outline:3px solid var(--rose);outline-offset:2px}
 .note{font-size:.86rem;color:var(--ink-soft)}
+.pickup{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:var(--bg);border:1.5px solid var(--line);color:var(--ink);text-decoration:none;transition:border-color .15s}
+.pickup:hover{border-color:var(--rose)}
+.pickup > svg{width:24px;height:24px;flex:none;color:var(--rose)}
+.pickup > span:first-of-type{display:grid;gap:2px;min-width:0;flex:1}
+.pickup small{color:var(--ink-soft);font-size:.86rem}
+.pickup .go{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:.9rem;white-space:nowrap;color:var(--rose)}
+.pickup .go svg{width:16px;height:16px}
+@media (max-width:620px){.pickup{flex-wrap:wrap;row-gap:6px}.pickup .go{flex-basis:100%;padding-left:36px}}
 .phone{display:flex;align-items:stretch;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);overflow:hidden}
 .phone:focus-within{border-color:var(--rose);box-shadow:0 0 0 3px var(--rose-soft)}
 .phone .cc{display:flex;align-items:center;padding:0 .8em;font-weight:800;color:var(--ink);border-right:1.5px solid var(--line);font-variant-numeric:tabular-nums}
@@ -450,6 +458,11 @@ footer .area svg{width:18px;height:18px;flex:none;margin-top:2px;color:var(--ros
             <label><input type="radio" name="method" id="m-delivery" value="Delivery"><span>Delivery</span></label>
           </div>
         </fieldset>
+        <a class="pickup" id="pickupBox" href="https://maps.app.goo.gl/hy11zn9rGxqKMDTQ8" target="_blank" rel="noopener">
+          <svg aria-hidden="true"><use href="#pin"/></svg>
+          <span><b>Pickup location</b><small>Bugaa's kitchen, New Cairo</small></span>
+          <span class="go">Open in Maps<svg aria-hidden="true"><use href="#arrow"/></svg></span>
+        </a>
         <div class="field" id="addrField" hidden><label for="address">Delivery address</label><input id="address" name="address" autocomplete="street-address" placeholder="Street, building, apartment, area in New Cairo"></div>
         <fieldset class="field">
           <legend>Payment method</legend>
@@ -746,6 +759,7 @@ render();
 // delivery toggle
 document.querySelectorAll('input[name="method"]').forEach(r => r.onchange = () => {
   $("#addrField").hidden = !$("#m-delivery").checked;
+  $("#pickupBox").hidden = $("#m-delivery").checked;
 });
 
 // Egyptian mobile: accepts 010…, 10…, +2010…, 002010… → returns 10 digits starting with 1, or null
