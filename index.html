@@ -159,6 +159,9 @@ header.top nav a:hover{color:var(--mocha)}
 .product .ph img{width:100%;height:100%;object-fit:cover}
 .product .body{padding:22px;display:flex;flex-direction:column;gap:14px;flex:1}
 .product .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.product .price{font-size:1.75rem;line-height:1.1}
+.price small{font:600 .72rem var(--f-label);letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);margin-right:.35em;vertical-align:.35em}
+.product h3{font-size:1.25rem}
 .product .size{margin-top:-8px}
 .price{font:400 1.6rem/1 var(--f-display);font-variant-numeric:tabular-nums;white-space:nowrap}
 .product p.desc{color:var(--ink-soft);font-size:.96rem}
@@ -231,9 +234,8 @@ a.product:hover .cta{box-shadow:0 6px 0 -2px var(--rose)}
 .product .cta{margin-top:auto;width:100%}
 .btn svg{width:1.15em;height:1.15em;flex:none}
 .product.soon .ph{position:relative}
-.product.soon .ph img{filter:blur(7px) saturate(.85);transform:scale(1.08)}
-.soon-tag{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);padding:.55em 1.2em;border-radius:999px;background:var(--bg);color:var(--ink);
-  font:600 .8rem var(--f-label);letter-spacing:.22em;text-transform:uppercase;white-space:nowrap;box-shadow:0 8px 24px -10px rgba(0,0,0,.6)}
+.product.soon .fph span{font-size:.85rem}
+.product.soon .fph svg{width:64px;height:64px}
 .product.soon .cta{background:transparent;color:var(--ink-soft);box-shadow:inset 0 0 0 1.5px var(--line);cursor:default}
 .product.soon .cta:hover{transform:none;box-shadow:inset 0 0 0 1.5px var(--line)}
 /* product page */
@@ -258,7 +260,7 @@ body.viewing .bar{display:none!important}
 .ftile.has,.ftile.pick:has(input:checked){border-color:var(--ink);box-shadow:0 0 0 1.5px var(--ink)}
 .fimg{position:relative;aspect-ratio:1;background:var(--rose-soft)}
 .fimg img{position:relative;z-index:1;width:100%;height:100%;object-fit:cover}
-.fph{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:8px;padding:10px;text-align:center;color:var(--mocha);
+.fph{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:8px;padding:10px;text-align:center;color:var(--ink-soft);
   background:repeating-linear-gradient(135deg,var(--rose-soft) 0 14px,color-mix(in srgb,var(--rose-soft) 60%,var(--paper)) 14px 28px)}
 .fph svg{width:46px;height:46px}
 .fph span{font:600 .64rem var(--f-label);letter-spacing:.18em;text-transform:uppercase}
@@ -535,16 +537,18 @@ try { cart = JSON.parse(localStorage.getItem("bugaas-cart") || "[]"); } catch(e)
 cart = cart.filter(i => { const p = PRODUCTS.find(x => x.id === i.id); return p && (!p.sizes || i.size) && i.flavour !== "Chef's mix"; });
 const save = () => { try { localStorage.setItem("bugaas-cart", JSON.stringify(cart)); } catch(e) {} };
 
+const CAKE = '<svg viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M6 31 40 17l2 14z"/><path d="M6 31v8h36v-8"/><path d="M6 35h36"/><path d="M33 13c2-3 6-2 6 1"/></g></svg>';
 // menu cards: each opens its product page
 const wrap = $("#products");
 PRODUCTS.forEach(p => {
   const el = document.createElement(p.soon ? "div" : "a");
   el.className = "product" + (p.soon ? " soon" : ""); if (!p.soon) el.href = `#p-${p.id}`;
   el.innerHTML = `
-    <div class="ph"><img src="${p.img}" alt="${p.name}${p.size ? ", " + p.size : ""}" loading="lazy">${p.soon ? `<span class="soon-tag">Coming soon</span>` : ""}</div>
+    <div class="ph">${p.soon ? `<div class="fph">${CAKE}<span>Coming soon</span></div>` : `<img src="${p.img}" alt="${p.name}${p.size ? ", " + p.size : ""}" loading="lazy">`}</div>
     <div class="body">
       <span class="chip">${p.chip}</span>
-      <div class="row"><h3>${p.name}</h3>${p.soon ? "" : `<span class="price">${p.sizes ? "From " + fmt(Math.min(...p.sizes.map(s => s.price))) : (p.from ? "From " : "") + fmt(p.price)}</span>`}</div>${p.perPiece ? `<span class="label size">Per ${p.unit.replace(/s$/, "")}</span>` : p.size ? `<span class="label size">${p.size}</span>` : ""}
+      <h3>${p.name}</h3>${p.perPiece ? `<span class="label size">Per ${p.unit.replace(/s$/, "")}</span>` : p.size ? `<span class="label size">${p.size}</span>` : ""}
+      ${p.soon ? "" : `<span class="price">${p.sizes || p.from ? `<small>From</small> ` : ""}${fmt(p.sizes ? Math.min(...p.sizes.map(s => s.price)) : p.price)}</span>`}
       ${p.soon ? `<span class="btn cta" aria-disabled="true">Coming soon</span>` : `<span class="btn cta">${p.perPiece || p.sizes ? "Choose your flavours" : "Choose your flavour"}<svg aria-hidden="true"><use href="#arrow"/></svg></span>`}
     </div>`;
   wrap.appendChild(el);
@@ -611,7 +615,6 @@ drawer.querySelectorAll("[data-close]").forEach(a => a.addEventListener("click",
 document.addEventListener("keydown", e => { if (e.key === "Escape" && drawer.classList.contains("open")) { closeCart(); cartBtn.focus(); } });
 
 /* ---------- product pages (#p-slices, #p-bites, #p-whole) ---------- */
-const CAKE = '<svg viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M6 31 40 17l2 14z"/><path d="M6 31v8h36v-8"/><path d="M6 35h36"/><path d="M33 13c2-3 6-2 6 1"/></g></svg>';
 const fimg = f => `<div class="fimg"><img src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.remove()"><div class="fph" aria-hidden="true">${CAKE}<span>Photo coming soon</span></div></div>`;
 let cur = null, picks = {}, pq = 1, box = null;
 const picked = () => Object.values(picks).reduce((a, b) => a + b, 0);
