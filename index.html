@@ -417,7 +417,7 @@ footer .area svg{width:18px;height:18px;flex:none;margin-top:2px;color:var(--ros
     <div class="wrap">
       <a class="back" href="#menu"><svg aria-hidden="true"><use href="#arrow"/></svg>Back to menu</a>
       <div class="pv-top">
-        <figure class="pv-img"><img id="pvImg" src="images/bites.jpg" alt=""></figure>
+        <figure class="pv-img"><img id="pvImg" src="images/slices.jpg" alt=""></figure>
         <div class="pv-info">
           <span class="chip" id="pvChip"></span>
           <h1 id="pvTitle"></h1>
@@ -516,23 +516,23 @@ footer .area svg{width:18px;height:18px;flex:none;margin-top:2px;color:var(--ros
 /* ===== Settings: change these ===== */
 const WHATSAPP_NUMBER = "201015055588";  // international format, digits only: 20 + mobile number without the leading 0
 const CURRENCY = "EGP";
-// Flavour photos: upload a square photo to images/flavours/ with the file name below.
-// Until a photo exists, the site shows a placeholder.
+// Flavour photos live in images/flavours/slices/ and images/flavours/whole/.
+// "slices" shows on the Slices page, "whole" on the Whole Cheesecake page. No photo = placeholder.
 const FLAVOURS = [
-  { name:"The Classic",           img:"images/flavours/the-classic.jpg" },
-  { name:"Berry Drizzle",         img:"images/flavours/berry-drizzle.jpg" },
-  { name:"Pistachio Cream",       img:"images/flavours/pistachio-cream.jpg" },
-  { name:"Kinder Crush",          img:"images/flavours/kinder-crush.jpg" },
-  { name:"Biscoff Butter Crunch", img:"images/flavours/biscoff-butter-crunch.jpg" },
-  { name:"Golden Caramel Pecan",  img:"images/flavours/golden-caramel-pecan.jpg" },
+  { name:"The Classic",           img:{ slices:"images/flavours/slices/the-classic.jpg",           whole:"images/flavours/whole/the-classic.jpg" } },
+  { name:"Berry Drizzle",         img:{} },
+  { name:"Pistachio Cream",       img:{ slices:"images/flavours/slices/pistachio-cream.jpg",       whole:"images/flavours/whole/pistachio-cream.jpg" } },
+  { name:"Kinder Crush",          img:{ slices:"images/flavours/slices/kinder-crush.jpg",          whole:"images/flavours/whole/kinder-crush.jpg" } },
+  { name:"Biscoff Butter Crunch", img:{ slices:"images/flavours/slices/biscoff-butter-crunch.jpg", whole:"images/flavours/whole/biscoff-butter-crunch.jpg" } },
+  { name:"Golden Caramel Pecan",  img:{ slices:"images/flavours/slices/golden-caramel-pecan.jpg",  whole:"images/flavours/whole/golden-caramel-pecan.jpg" } },
 ];
 // perPiece: customer picks any number of pieces, priced per piece
 // sizes: customer picks a box size, then fills it with any mix of flavours
 const PRODUCTS = [
-  { id:"slices", name:"Cheesecake Slices", size:"", price:130, from:true, perPiece:true, unit:"slices", img:"images/bites.jpg", chip:"Most ordered" },
+  { id:"slices", name:"Cheesecake Slices", size:"", price:130, from:true, perPiece:true, unit:"slices", img:"images/slices.jpg", chip:"Most ordered" },
   { id:"bites",  name:"Cheesecake Bites", size:"Box of 4 or 8", unit:"bites", img:"images/bag.jpg", chip:"For sharing", soon:true,
     sizes:[ { label:"Box of 4", pieces:4, price:200 }, { label:"Box of 8", pieces:8, price:350 } ] },
-  { id:"whole",  name:"Whole Cheesecake", size:"Serves up to 12 people", price:1000, from:true, perPiece:true, unit:"cakes", img:"images/cake.jpg", chip:"Celebrations" },
+  { id:"whole",  name:"Whole Cheesecake", size:"Serves up to 12 people", price:1000, from:true, perPiece:true, unit:"cakes", img:"images/whole.jpg", chip:"Celebrations" },
 ];
 const priceOf = (p, i) => i && i.price != null ? i.price : p.sizes ? p.sizes[0].price : p.price;
 const sizeOf = (p, i) => i && i.size ? i.size : p.sizes ? "" : p.size;
@@ -627,14 +627,15 @@ drawer.querySelectorAll("[data-close]").forEach(a => a.addEventListener("click",
 document.addEventListener("keydown", e => { if (e.key === "Escape" && drawer.classList.contains("open")) { closeCart(); cartBtn.focus(); } });
 
 /* ---------- product pages (#p-slices, #p-bites, #p-whole) ---------- */
-const fimg = f => `<div class="fimg"><img src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.remove()"><div class="fph" aria-hidden="true">${CAKE}<span>Photo coming soon</span></div></div>`;
+const fimg = (f, p) => { const src = f.img[p.id] || f.img.slices;
+  return `<div class="fimg">${src ? `<img src="${src}" alt="${f.name}" loading="lazy" onerror="this.remove()">` : ""}<div class="fph" aria-hidden="true">${CAKE}<span>Photo coming soon</span></div></div>`; };
 let cur = null, picks = {}, pq = 1, box = null;
 const picked = () => Object.values(picks).reduce((a, b) => a + b, 0);
 const one = u => u.replace(/s$/, "");
 
 function stepTile(f, p){
   const t = document.createElement("div"); t.className = "ftile";
-  t.innerHTML = `${fimg(f)}<div class="fbody"><span class="fname">${f.name}</span>
+  t.innerHTML = `${fimg(f, p)}<div class="fbody"><span class="fname">${f.name}</span>
     <div class="stepper" role="group" aria-label="${f.name}"><button type="button" data-d="-1" aria-label="Fewer ${f.name}">−</button><output>0</output><button type="button" data-d="1" aria-label="More ${f.name}">+</button></div></div>`;
   t.querySelectorAll("button").forEach(b => b.onclick = () => {
     const d = +b.dataset.d, now = picks[f.name] || 0;
@@ -680,7 +681,7 @@ function openProduct(p){
   FLAVOURS.forEach((f, i) => {
     if (multi) { g.appendChild(stepTile(f, p)); return; }
     const t = document.createElement("label"); t.className = "ftile pick";
-    t.innerHTML = `<input type="radio" name="pvFlavour" value="${f.name}" ${i === 0 ? "checked" : ""}><span class="tick" aria-hidden="true">✓</span>${fimg(f)}<div class="fbody"><span class="fname">${f.name}</span></div>`;
+    t.innerHTML = `<input type="radio" name="pvFlavour" value="${f.name}" ${i === 0 ? "checked" : ""}><span class="tick" aria-hidden="true">✓</span>${fimg(f, p)}<div class="fbody"><span class="fname">${f.name}</span></div>`;
     g.appendChild(t);
   });
   const bar = $("#pvBar");
