@@ -274,6 +274,7 @@ body.viewing .bar{display:none!important}
 .fph span{font:600 .64rem var(--f-label);letter-spacing:.18em;text-transform:uppercase}
 .fbody{display:grid;gap:10px;justify-items:center;padding:12px 10px 14px;text-align:center}
 .fname{font-weight:800;line-height:1.25}
+.fprice{margin-top:-6px;font-weight:700;font-size:.9rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
 .stepper button:disabled{opacity:.3;cursor:not-allowed}
 .ftile.pick{cursor:pointer}
 .ftile.pick input{position:absolute;opacity:0;pointer-events:none}
@@ -529,12 +530,15 @@ const FLAVOURS = [
 // perPiece: customer picks any number of pieces, priced per piece
 // sizes: customer picks a box size, then fills it with any mix of flavours
 const PRODUCTS = [
-  { id:"slices", name:"Cheesecake Slices", size:"", price:130, from:true, perPiece:true, unit:"slices", img:"images/slices.jpg", chip:"Most ordered" },
+  { id:"slices", name:"Cheesecake Slices", size:"", price:150, prices:{ "The Classic":130 }, from:true, perPiece:true, unit:"slices", img:"images/slices.jpg", chip:"Most ordered" },
   { id:"bites",  name:"Cheesecake Bites", size:"Box of 4 or 8", unit:"bites", img:"images/bag.jpg", chip:"For sharing", soon:true,
     sizes:[ { label:"Box of 4", pieces:4, price:200 }, { label:"Box of 8", pieces:8, price:350 } ] },
-  { id:"whole",  name:"Whole Cheesecake", size:"Serves up to 12 people", price:1000, from:true, perPiece:true, unit:"cakes", img:"images/whole.jpg", chip:"Celebrations" },
+  { id:"whole",  name:"Whole Cheesecake", size:"Serves up to 12 people", price:1200, prices:{ "The Classic":1000 }, from:true, perPiece:true, unit:"cakes", img:"images/whole.jpg", chip:"Celebrations" },
 ];
-const priceOf = (p, i) => i && i.price != null ? i.price : p.sizes ? p.sizes[0].price : p.price;
+// price = standard price per piece; prices = flavours with a different price
+const flavourPrice = (p, name) => p.prices && p.prices[name] != null ? p.prices[name] : p.price;
+const minPrice = p => p.sizes ? Math.min(...p.sizes.map(s => s.price)) : Math.min(p.price, ...Object.values(p.prices || {}));
+const priceOf = (p, i) => i && i.price != null ? i.price : p.sizes ? p.sizes[0].price : flavourPrice(p, i && i.flavour);
 const sizeOf = (p, i) => i && i.size ? i.size : p.sizes ? "" : p.size;
 /* ================================== */
 
@@ -560,7 +564,7 @@ PRODUCTS.forEach(p => {
     <div class="body">
       <span class="chip">${p.chip}</span>
       <h3>${p.name}</h3>${p.size ? `<span class="label size">${p.size}</span>` : p.perPiece ? `<span class="label size">Per ${p.unit.replace(/s$/, "")}</span>` : ""}
-      ${p.soon ? "" : `<span class="price">${p.sizes || p.from ? `<small>From</small> ` : ""}${fmt(p.sizes ? Math.min(...p.sizes.map(s => s.price)) : p.price)}</span>`}
+      ${p.soon ? "" : `<span class="price">${p.sizes || p.from ? `<small>From</small> ` : ""}${fmt(minPrice(p))}</span>`}
       ${p.soon ? `<span class="btn cta" aria-disabled="true">Coming soon</span>` : `<span class="btn cta">${p.perPiece || p.sizes ? "Choose your flavours" : "Choose your flavour"}<svg aria-hidden="true"><use href="#arrow"/></svg></span>`}
     </div>`;
   wrap.appendChild(el);
@@ -635,7 +639,7 @@ const one = u => u.replace(/s$/, "");
 
 function stepTile(f, p){
   const t = document.createElement("div"); t.className = "ftile";
-  t.innerHTML = `${fimg(f, p)}<div class="fbody"><span class="fname">${f.name}</span>
+  t.innerHTML = `${fimg(f, p)}<div class="fbody"><span class="fname">${f.name}</span><span class="fprice">${fmt(flavourPrice(p, f.name))}</span>
     <div class="stepper" role="group" aria-label="${f.name}"><button type="button" data-d="-1" aria-label="Fewer ${f.name}">−</button><output>0</output><button type="button" data-d="1" aria-label="More ${f.name}">+</button></div></div>`;
   t.querySelectorAll("button").forEach(b => b.onclick = () => {
     const d = +b.dataset.d, now = picks[f.name] || 0;
@@ -659,7 +663,7 @@ function openProduct(p){
   $("#pvImg").src = p.img; $("#pvImg").alt = p.name;
   $("#pvChip").textContent = p.chip; $("#pvTitle").textContent = p.name;
   $("#pvSize").textContent = p.size; $("#pvSize").hidden = !p.size || !!p.sizes;
-  $("#pvPrice").textContent = p.sizes ? `From ${fmt(Math.min(...p.sizes.map(s => s.price)))}` : (p.from ? "From " : "") + fmt(p.price) + (p.perPiece ? ` per ${one(p.unit)}` : "");
+  $("#pvPrice").textContent = p.sizes ? `From ${fmt(Math.min(...p.sizes.map(s => s.price)))}` : (p.from ? "From " : "") + fmt(minPrice(p)) + (p.perPiece ? ` per ${one(p.unit)}` : "");
   $("#pvLede").textContent = p.perPiece ? `Choose as many ${p.unit} as you like, in any flavours.`
     : p.sizes ? `Pick your box size, then mix and match any flavours you like.`
     : "Choose one flavour for your cheesecake.";
@@ -716,7 +720,7 @@ function updateBar(){
     $("#pvAdd").classList.toggle("muted", !full);
     $("#pvGrid").querySelectorAll('button[data-d="1"]').forEach(b => b.disabled = n >= box.pieces);
   } else if (cur.perPiece) {
-    $("#pvCount").innerHTML = n ? `<b>${n}</b> ${n === 1 ? one(cur.unit) : cur.unit} · <b>${fmt(n * cur.price)}</b>` : `Tap + to add ${cur.unit}`;
+    $("#pvCount").innerHTML = n ? `<b>${n}</b> ${n === 1 ? one(cur.unit) : cur.unit} · <b>${fmt(Object.entries(picks).reduce((t, [f, q]) => t + q * flavourPrice(cur, f), 0))}</b>` : `Tap + to add ${cur.unit}`;
     $("#pvAdd").classList.toggle("muted", !n);
   } else {
     $("#pvQty").textContent = pq;
