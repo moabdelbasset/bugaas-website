@@ -263,7 +263,7 @@ body.viewing .bar{display:none!important}
 .pv-h{font:400 clamp(1.5rem,3vw,2.1rem)/1.1 var(--f-display);color:var(--ink)}
 .pv-sub{color:var(--ink-soft);margin-top:6px}
 .fgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px}
-@media (min-width:1000px){.fgrid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media (min-width:1000px){.fgrid{grid-template-columns:repeat(5,minmax(0,1fr))}}
 .ftile{position:relative;display:flex;flex-direction:column;background:var(--paper);border:1.5px solid var(--line);border-radius:18px;overflow:hidden;transition:border-color .15s,box-shadow .15s}
 .ftile.has,.ftile.pick:has(input:checked){border-color:var(--ink);box-shadow:0 0 0 1.5px var(--ink)}
 .fimg{position:relative;aspect-ratio:1;background:var(--rose-soft)}
@@ -521,7 +521,6 @@ const CURRENCY = "EGP";
 // "slices" shows on the Slices page, "whole" on the Whole Cheesecake page. No photo = placeholder.
 const FLAVOURS = [
   { name:"The Classic",           img:{ slices:"images/flavours/slices/the-classic.jpg",           whole:"images/flavours/whole/the-classic.jpg" } },
-  { name:"Berry Drizzle",         img:{} },
   { name:"Pistachio Cream",       img:{ slices:"images/flavours/slices/pistachio-cream.jpg",       whole:"images/flavours/whole/pistachio-cream.jpg" } },
   { name:"Kinder Crush",          img:{ slices:"images/flavours/slices/kinder-crush.jpg",          whole:"images/flavours/whole/kinder-crush.jpg" } },
   { name:"Biscoff Butter Crunch", img:{ slices:"images/flavours/slices/biscoff-butter-crunch.jpg", whole:"images/flavours/whole/biscoff-butter-crunch.jpg" } },
