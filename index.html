@@ -218,6 +218,9 @@ legend{padding:0;margin-bottom:6px}
 .seg input:checked + span{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .seg input:focus-visible + span{outline:3px solid var(--rose);outline-offset:2px}
 .note{font-size:.86rem;color:var(--ink-soft)}
+.ready{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--rose-soft);color:var(--ink);font-size:.95rem;line-height:1.45}
+.ready svg{width:20px;height:20px;flex:none;margin-top:1px;color:var(--ink)}
+.ready b{white-space:nowrap}
 .pickup{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:var(--bg);border:1.5px solid var(--line);color:var(--ink);text-decoration:none;transition:border-color .15s}
 .pickup:hover{border-color:var(--rose)}
 .pickup > svg{width:24px;height:24px;flex:none;color:var(--rose)}
@@ -410,6 +413,7 @@ if (Date.now() < window.LAUNCH_AT && !/[?&]preview\b/.test(location.search)) doc
     <symbol id="tt" viewBox="0 0 24 24"><path fill="currentColor" d="M12.53.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07Z"/></symbol>
     <symbol id="pin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></g></symbol>
     <symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></g></symbol>
   </defs>
 </svg>
 
@@ -516,6 +520,7 @@ if (Date.now() < window.LAUNCH_AT && !/[?&]preview\b/.test(location.search)) doc
             <label><input type="radio" name="payment" id="pay-instapay" value="InstaPay"><span>InstaPay</span></label>
           </div>
         </fieldset>
+        <div class="ready" id="readyNote"><svg aria-hidden="true"><use href="#clock"/></svg><span id="readyText"></span></div>
         <button class="btn checkout" id="sendBtn" type="submit">Checkout</button>
         <p class="note" id="formMsg" role="status"></p>
       </form>
@@ -582,6 +587,7 @@ if (Date.now() < window.LAUNCH_AT && !/[?&]preview\b/.test(location.search)) doc
 const WHATSAPP_NUMBER = "201015055588";  // international format, digits only: 20 + mobile number without the leading 0
 const CURRENCY = "EGP";
 const DELIVERY_FEE = 50;   // added to the order total when the customer picks Delivery
+const LAST_ORDER_HOUR = 23; // Cairo time. Before this hour: ready tomorrow. From this hour: ready the day after tomorrow.
 // Flavour photos live in images/flavours/slices/, images/flavours/whole/ and images/flavours/bites/,
 // one per product page. No photo = placeholder. only:[...] limits a flavour to some products.
 const FLAVOURS = [
@@ -869,6 +875,7 @@ $("#orderForm").addEventListener("submit", e => {
     `Total: ${fmt(method === "Delivery" ? total + DELIVERY_FEE : total)}`, "",
     `Name: ${name}`, `Phone: +20 ${phone.replace(/^(\d{2})(\d{4})(\d{4})$/, "$1 $2 $3")}`,
     `Order type: ${method}`,
+    `${method === "Delivery" ? "Delivery" : "Pickup"} date: ${readyInfo().label}`,
     method === "Delivery" ? `Address: ${address}` : null,
     `Payment: ${payment}`
   ].filter(x => x !== null).join("\n");
@@ -905,6 +912,26 @@ function toast(t){ const el=$("#toast"); el.textContent=t; el.classList.add("on"
   }
   const timer = setInterval(tick, 1000); tick();
 })();
+
+/* ---------- when the order will be ready (Cairo time) ---------- */
+function readyInfo(){
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone:"Africa/Cairo", year:"numeric", month:"numeric", day:"numeric", hour:"numeric", hourCycle:"h23" })
+    .formatToParts(new Date()).map(x => [x.type, +x.value]));
+  const late = parts.hour >= LAST_ORDER_HOUR;
+  const days = late ? 2 : 1;
+  const d = new Date(Date.UTC(parts.year, parts.month - 1, parts.day + days));
+  const label = d.toLocaleDateString("en-GB", { timeZone:"UTC", weekday:"long", day:"numeric", month:"long" });
+  return { late, days, label };
+}
+function updateReady(){
+  const r = readyInfo(), method = $("#m-delivery").checked ? "delivered" : "ready for pickup";
+  const h = LAST_ORDER_HOUR % 12 || 12, ampm = LAST_ORDER_HOUR >= 12 ? "PM" : "AM";
+  $("#readyText").innerHTML = r.late
+    ? `It's past ${h} ${ampm} in Cairo, so orders placed now will be ${method} the day after tomorrow, <b>${r.label}</b>.`
+    : `Order now and your order will be ${method} tomorrow, <b>${r.label}</b>.`;
+}
+document.querySelectorAll('input[name="method"]').forEach(x => x.addEventListener("change", updateReady));
+updateReady(); setInterval(updateReady, 60000);
 </script>
 
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "30e48adb19bb4d32816ddcfc54bc74bc"}'></script><!-- End Cloudflare Web Analytics -->
