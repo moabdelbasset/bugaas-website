@@ -204,6 +204,8 @@ select:focus,input:focus,textarea:focus{outline:none;border-color:var(--rose);bo
 .lines .rm{border:0;background:none;color:var(--ink-soft);cursor:pointer;font:700 .85rem var(--f-body);text-decoration:underline;padding:12px 6px;margin:-12px -6px}
 .empty{color:var(--ink-soft);text-align:center;padding:18px;border:1.5px dashed var(--line);border-radius:14px}
 .total{display:flex;justify-content:space-between;align-items:baseline}
+.sub{display:grid;gap:6px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.sub div{display:flex;justify-content:space-between}
 .total .price{font-size:2rem}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:520px){.two{grid-template-columns:1fr}}
@@ -484,6 +486,10 @@ if (Date.now() < window.LAUNCH_AT && !/[?&]preview\b/.test(location.search)) doc
       </div>
       <form class="slip" id="orderForm" novalidate>
         <ul class="lines" id="lines"></ul>
+        <div class="sub" id="subRows" hidden>
+          <div><span>Subtotal</span><span id="subtotal">EGP 0</span></div>
+          <div><span>Delivery</span><span id="delFee">EGP 50</span></div>
+        </div>
         <div class="total"><span class="label">Total</span><span class="price" id="total">EGP 0</span></div>
         <div class="field"><label for="name">Name</label><input id="name" name="name" autocomplete="name" placeholder="e.g. Sara"></div>
         <div class="field"><label for="phone">Phone number</label>
@@ -575,6 +581,7 @@ if (Date.now() < window.LAUNCH_AT && !/[?&]preview\b/.test(location.search)) doc
 /* ===== Settings: change these ===== */
 const WHATSAPP_NUMBER = "201015055588";  // international format, digits only: 20 + mobile number without the leading 0
 const CURRENCY = "EGP";
+const DELIVERY_FEE = 50;   // added to the order total when the customer picks Delivery
 // Flavour photos live in images/flavours/slices/, images/flavours/whole/ and images/flavours/bites/,
 // one per product page. No photo = placeholder. only:[...] limits a flavour to some products.
 const FLAVOURS = [
@@ -640,11 +647,14 @@ function render(){
     lines.appendChild(li);
   });
   if (!cart.length) lines.innerHTML = `<li class="empty" style="display:block">Your box is empty. <a href="#menu">Pick something from the menu</a>.</li>`;
-  $("#total").textContent = fmt(total);
+  const del = cart.length && $("#m-delivery").checked ? DELIVERY_FEE : 0;
+  $("#subRows").hidden = !del;
+  $("#subtotal").textContent = fmt(total); $("#delFee").textContent = fmt(DELIVERY_FEE);
+  $("#total").textContent = fmt(total + del);
+  $("#barText").textContent = `${count} item${count===1?"":"s"} · ${fmt(total + del)}`;
   const badge = $("#cartCount"); badge.textContent = count; badge.hidden = count === 0;
   $("#cartBtn").setAttribute("aria-label", count ? `Open cart, ${count} item${count===1?"":"s"}` : "Open cart");
   renderDrawer(total);
-  $("#barText").textContent = `${count} item${count===1?"":"s"} · ${fmt(total)}`;
   $("#bar").classList.toggle("show", count > 0);
   document.body.classList.toggle("has-bar", count > 0);
   $("#sendBtn").disabled = !cart.length;
@@ -823,6 +833,7 @@ render();
 // delivery toggle
 document.querySelectorAll('input[name="method"]').forEach(r => r.onchange = () => {
   $("#addrField").hidden = !$("#m-delivery").checked;
+  render();
   $("#pickupBox").hidden = $("#m-delivery").checked;
 });
 
@@ -850,10 +861,12 @@ $("#orderForm").addEventListener("submit", e => {
 
   const total = render();
   const lines = cart.map(i => { const p = PRODUCTS.find(x=>x.id===i.id);
-    const sz = sizeOf(p, i);
+    const sz = p.id === "whole" ? "" : sizeOf(p, i);
     return `• ${i.qty} × ${p.name}${sz ? ` – ${sz}` : ""} (${i.flavour}) – ${fmt(priceOf(p, i)*i.qty)}`; });
   const text = [
-    "Hi Bugaa's! I'd like to order:", "", ...lines, "", `Total: ${fmt(total)}`, "",
+    "Hi Bugaa's! I'd like to order:", "", ...lines, "",
+    ...(method === "Delivery" ? [`Subtotal: ${fmt(total)}`, `Delivery: ${fmt(DELIVERY_FEE)}`] : []),
+    `Total: ${fmt(method === "Delivery" ? total + DELIVERY_FEE : total)}`, "",
     `Name: ${name}`, `Phone: +20 ${phone.replace(/^(\d{2})(\d{4})(\d{4})$/, "$1 $2 $3")}`,
     `Order type: ${method}`,
     method === "Delivery" ? `Address: ${address}` : null,
