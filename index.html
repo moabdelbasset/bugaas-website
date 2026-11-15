@@ -574,21 +574,21 @@ if (Date.now() < window.LAUNCH_AT && !/[?&]preview\b/.test(location.search)) doc
 /* ===== Settings: change these ===== */
 const WHATSAPP_NUMBER = "201015055588";  // international format, digits only: 20 + mobile number without the leading 0
 const CURRENCY = "EGP";
-// Flavour photos live in images/flavours/slices/ and images/flavours/whole/.
-// "slices" shows on the Slices page, "whole" on the Whole Cheesecake page. No photo = placeholder.
+// Flavour photos live in images/flavours/slices/, images/flavours/whole/ and images/flavours/bites/,
+// one per product page. No photo = placeholder.
 const FLAVOURS = [
-  { name:"The Classic",           img:{ slices:"images/flavours/slices/the-classic.jpg",           whole:"images/flavours/whole/the-classic.jpg" } },
-  { name:"Pistachio Cream",       img:{ slices:"images/flavours/slices/pistachio-cream.jpg",       whole:"images/flavours/whole/pistachio-cream.jpg" } },
-  { name:"Kinder Crush",          img:{ slices:"images/flavours/slices/kinder-crush.jpg",          whole:"images/flavours/whole/kinder-crush.jpg" } },
-  { name:"Biscoff Butter Crunch", img:{ slices:"images/flavours/slices/biscoff-butter-crunch.jpg", whole:"images/flavours/whole/biscoff-butter-crunch.jpg" } },
-  { name:"Golden Caramel Pecan",  img:{ slices:"images/flavours/slices/golden-caramel-pecan.jpg",  whole:"images/flavours/whole/golden-caramel-pecan.jpg" } },
+  { name:"The Classic",           img:{ slices:"images/flavours/slices/the-classic.jpg",           whole:"images/flavours/whole/the-classic.jpg", bites:"images/flavours/bites/the-classic.jpg" } },
+  { name:"Pistachio Cream",       img:{ slices:"images/flavours/slices/pistachio-cream.jpg",       whole:"images/flavours/whole/pistachio-cream.jpg", bites:"images/flavours/bites/pistachio-cream.jpg" } },
+  { name:"Kinder Crush",          img:{ slices:"images/flavours/slices/kinder-crush.jpg",          whole:"images/flavours/whole/kinder-crush.jpg", bites:"images/flavours/bites/kinder-crush.jpg" } },
+  { name:"Biscoff Butter Crunch", img:{ slices:"images/flavours/slices/biscoff-butter-crunch.jpg", whole:"images/flavours/whole/biscoff-butter-crunch.jpg", bites:"images/flavours/bites/biscoff-butter-crunch.jpg" } },
+  { name:"Golden Caramel Pecan",  img:{ slices:"images/flavours/slices/golden-caramel-pecan.jpg",  whole:"images/flavours/whole/golden-caramel-pecan.jpg", bites:"images/flavours/bites/golden-caramel-pecan.jpg" } },
 ];
 // perPiece: customer picks any number of pieces, priced per piece
 // sizes: customer picks a box size, then fills it with any mix of flavours
 const PRODUCTS = [
   { id:"slices", name:"Cheesecake Slices", size:"", price:150, prices:{ "The Classic":120 }, from:true, perPiece:true, unit:"slices", img:"images/slices.jpg", chip:"Most ordered" },
-  { id:"bites",  name:"Cheesecake Bites", size:"Box of 4 or 8", unit:"bites", img:"images/bag.jpg", chip:"For sharing", soon:true,
-    sizes:[ { label:"Box of 4", pieces:4, price:200 }, { label:"Box of 8", pieces:8, price:350 } ] },
+  { id:"bites",  name:"Cheesecake Bites", size:"Box of 4 or 8", unit:"bites", img:"images/bites.jpg", chip:"For sharing",
+    sizes:[ { label:"Box of 4", pieces:4, price:300 }, { label:"Box of 8", pieces:8, price:600 } ] },
   { id:"whole",  name:"Whole Cheesecake", size:"Serves up to 10 people", price:1200, prices:{ "The Classic":1000 }, from:true, perPiece:true, unit:"cakes", img:"images/whole.jpg", chip:"Celebrations" },
 ];
 // price = standard price per piece; prices = flavours with a different price
@@ -695,7 +695,7 @@ const one = u => u.replace(/s$/, "");
 
 function stepTile(f, p){
   const t = document.createElement("div"); t.className = "ftile";
-  t.innerHTML = `${fimg(f, p)}<div class="fbody"><span class="fname">${f.name}</span><span class="fprice">${fmt(flavourPrice(p, f.name))}</span>
+  t.innerHTML = `${fimg(f, p)}<div class="fbody"><span class="fname">${f.name}</span>${p.sizes ? "" : `<span class="fprice">${fmt(flavourPrice(p, f.name))}</span>`}
     <div class="stepper" role="group" aria-label="${f.name}"><button type="button" data-d="-1" aria-label="Fewer ${f.name}">−</button><output>0</output><button type="button" data-d="1" aria-label="More ${f.name}">+</button></div></div>`;
   t.querySelectorAll("button").forEach(b => b.onclick = () => {
     const d = +b.dataset.d, now = picks[f.name] || 0;

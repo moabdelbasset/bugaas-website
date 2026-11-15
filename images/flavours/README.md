@@ -1,9 +1,10 @@
 # Flavour photos
 
-Each flavour has two square photos (JPG, about 800 × 800 px):
+Each flavour has one square photo per product page (JPG):
 
 - `slices/` — shown on the Cheesecake Slices page
 - `whole/` — shown on the Whole Cheesecake page
+- `bites/` — shown on the Cheesecake Bites page
 
 | Flavour | File name |
 |---|---|
