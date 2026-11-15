@@ -290,6 +290,7 @@ body.viewing .bar{display:none!important}
 .pv-sizes{max-width:440px;margin-bottom:36px}
 .pv-sizes legend{font:600 .78rem var(--f-label);letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft)}
 .pv-sizes .seg span{flex-direction:column;gap:2px;padding:.85em .6em;font-size:1.05rem}
+.pv-sizes .seg em{font-style:normal;font-weight:600;font-size:.78rem;opacity:.75;margin-top:2px}
 .pv-sizes .seg small{font-weight:600;font-size:.85rem;opacity:.8;font-variant-numeric:tabular-nums}
 .pv-bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--paper);border-top:1px solid var(--line);box-shadow:0 -12px 30px -22px rgba(74,36,20,.45);padding:12px 0 calc(12px + env(safe-area-inset-bottom,0px))}
 .pv-bar .wrap{display:flex;align-items:center;justify-content:flex-end;gap:16px}
@@ -603,7 +604,7 @@ const FLAVOURS = [
 const PRODUCTS = [
   { id:"slices", name:"Cheesecake Slices", size:"", price:150, prices:{ "The Classic":120 }, from:true, perPiece:true, unit:"slices", img:"images/slices.jpg", chip:"Most ordered" },
   { id:"bites",  name:"Cheesecake Bites", size:"Box of 4 or 8 · Serves 2–4 people", unit:"bites", img:"images/bites.jpg", chip:"For sharing", noPhotos:true,
-    sizes:[ { label:"Box of 4", pieces:4, price:300 }, { label:"Box of 8", pieces:8, price:600 } ] },
+    sizes:[ { label:"Box of 4", pieces:4, price:300, serves:"Serves up to 2 people" }, { label:"Box of 8", pieces:8, price:600, serves:"Serves up to 4 people" } ] },
   { id:"whole",  name:"Whole Cheesecake", size:"Serves up to 10 people", price:1200, prices:{ "The Classic":1000, "Quad Crave":1300 }, from:true, perPiece:true, unit:"cakes", img:"images/whole.jpg", chip:"Celebrations" },
 ];
 // price = standard price per piece; prices = flavours with a different price
@@ -745,7 +746,7 @@ function openProduct(p){
   const sizes = $("#pvSizes");
   sizes.hidden = !p.sizes;
   sizes.innerHTML = p.sizes ? `<legend>Box size</legend><div class="seg">${p.sizes.map((s, i) =>
-    `<label><input type="radio" name="pvBox" value="${i}" ${i === 0 ? "checked" : ""}><span>${s.label}<small>${fmt(s.price)}</small></span></label>`).join("")}</div>` : "";
+    `<label><input type="radio" name="pvBox" value="${i}" ${i === 0 ? "checked" : ""}><span>${s.label}<small>${fmt(s.price)}</small>${s.serves ? `<em>${s.serves}</em>` : ""}</span></label>`).join("")}</div>` : "";
   sizes.querySelectorAll("input").forEach(r => r.onchange = () => {
     box = p.sizes[+r.value];
     if (picked() > box.pieces) { resetPicks(); toast(`Box of ${box.pieces}: choose your flavours again`); }
