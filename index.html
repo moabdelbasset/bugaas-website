@@ -634,7 +634,7 @@ PRODUCTS.forEach(p => {
     <div class="ph">${p.soon ? `<div class="fph">${CAKE}<span>Coming soon</span></div>` : `<img src="${p.img}" alt="${p.name}${p.size ? ", " + p.size : ""}" loading="lazy">`}</div>
     <div class="body">
       <span class="chip">${p.chip}</span>
-      <h3>${p.name}</h3>${p.size ? `<span class="label size">${p.size}</span>` : p.perPiece ? `<span class="label size">Per ${p.unit.replace(/s$/, "")}</span>` : ""}
+      <h3>${p.name}</h3>${p.size ? `<span class="label size">${p.size.split(" · ").join("<br>")}</span>` : p.perPiece ? `<span class="label size">Per ${p.unit.replace(/s$/, "")}</span>` : ""}
       ${p.soon ? "" : `<span class="price">${p.sizes || p.from ? `<small>From</small> ` : ""}${fmt(minPrice(p))}</span>`}
       ${p.soon ? `<span class="btn cta" aria-disabled="true">Coming soon</span>` : `<span class="btn cta">${p.perPiece || p.sizes ? "Choose your flavours" : "Choose your flavour"}<svg aria-hidden="true"><use href="#arrow"/></svg></span>`}
     </div>`;
