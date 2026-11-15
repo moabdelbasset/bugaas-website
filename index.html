@@ -263,7 +263,7 @@ body.viewing .bar{display:none!important}
 .pv-h{font:400 clamp(1.5rem,3vw,2.1rem)/1.1 var(--f-display);color:var(--ink)}
 .pv-sub{color:var(--ink-soft);margin-top:6px}
 .fgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px}
-@media (min-width:1000px){.fgrid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media (min-width:1000px){.fgrid{grid-template-columns:repeat(var(--cols,5),minmax(0,1fr))}}
 .ftile{position:relative;display:flex;flex-direction:column;background:var(--paper);border:1.5px solid var(--line);border-radius:18px;overflow:hidden;transition:border-color .15s,box-shadow .15s}
 .ftile.has,.ftile.pick:has(input:checked){border-color:var(--ink);box-shadow:0 0 0 1.5px var(--ink)}
 .fimg{position:relative;aspect-ratio:1;background:var(--rose-soft)}
@@ -576,13 +576,14 @@ if (Date.now() < window.LAUNCH_AT && !/[?&]preview\b/.test(location.search)) doc
 const WHATSAPP_NUMBER = "201015055588";  // international format, digits only: 20 + mobile number without the leading 0
 const CURRENCY = "EGP";
 // Flavour photos live in images/flavours/slices/, images/flavours/whole/ and images/flavours/bites/,
-// one per product page. No photo = placeholder.
+// one per product page. No photo = placeholder. only:[...] limits a flavour to some products.
 const FLAVOURS = [
   { name:"The Classic",           img:{ slices:"images/flavours/slices/the-classic.jpg",           whole:"images/flavours/whole/the-classic.jpg", bites:"images/flavours/bites/the-classic.jpg" } },
   { name:"Pistachio Cream",       img:{ slices:"images/flavours/slices/pistachio-cream.jpg",       whole:"images/flavours/whole/pistachio-cream.jpg", bites:"images/flavours/bites/pistachio-cream.jpg" } },
   { name:"Kinder Crush",          img:{ slices:"images/flavours/slices/kinder-crush.jpg",          whole:"images/flavours/whole/kinder-crush.jpg", bites:"images/flavours/bites/kinder-crush.jpg" } },
   { name:"Biscoff Butter Crunch", img:{ slices:"images/flavours/slices/biscoff-butter-crunch.jpg", whole:"images/flavours/whole/biscoff-butter-crunch.jpg", bites:"images/flavours/bites/biscoff-butter-crunch.jpg" } },
   { name:"Golden Caramel Pecan",  img:{ slices:"images/flavours/slices/golden-caramel-pecan.jpg",  whole:"images/flavours/whole/golden-caramel-pecan.jpg", bites:"images/flavours/bites/golden-caramel-pecan.jpg" } },
+  { name:"Quad Crave",            img:{ whole:"images/flavours/whole/quad-crave.jpg" }, only:["whole"] },
 ];
 // perPiece: customer picks any number of pieces, priced per piece
 // sizes: customer picks a box size, then fills it with any mix of flavours
@@ -590,7 +591,7 @@ const PRODUCTS = [
   { id:"slices", name:"Cheesecake Slices", size:"", price:150, prices:{ "The Classic":120 }, from:true, perPiece:true, unit:"slices", img:"images/slices.jpg", chip:"Most ordered" },
   { id:"bites",  name:"Cheesecake Bites", size:"Box of 4 or 8", unit:"bites", img:"images/bites.jpg", chip:"For sharing", noPhotos:true,
     sizes:[ { label:"Box of 4", pieces:4, price:300 }, { label:"Box of 8", pieces:8, price:600 } ] },
-  { id:"whole",  name:"Whole Cheesecake", size:"Serves up to 10 people", price:1200, prices:{ "The Classic":1000 }, from:true, perPiece:true, unit:"cakes", img:"images/whole.jpg", chip:"Celebrations" },
+  { id:"whole",  name:"Whole Cheesecake", size:"Serves up to 10 people", price:1200, prices:{ "The Classic":1000, "Quad Crave":1300 }, from:true, perPiece:true, unit:"cakes", img:"images/whole.jpg", chip:"Celebrations" },
 ];
 // price = standard price per piece; prices = flavours with a different price
 const flavourPrice = (p, name) => p.prices && p.prices[name] != null ? p.prices[name] : p.price;
@@ -739,7 +740,9 @@ function openProduct(p){
   $("#pvSub").textContent = multi ? `Tap + to add a ${one(p.unit)} of that flavour.` : "";
   $("#pvSub").hidden = !multi;
   const g = $("#pvGrid"); g.innerHTML = ""; g.classList.toggle("plain", !!p.noPhotos);
-  FLAVOURS.forEach((f, i) => {
+  const flist = FLAVOURS.filter(f => !f.only || f.only.includes(p.id));
+  g.style.setProperty("--cols", flist.length);
+  flist.forEach((f, i) => {
     if (multi) { g.appendChild(stepTile(f, p)); return; }
     const t = document.createElement("label"); t.className = "ftile pick";
     t.innerHTML = `<input type="radio" name="pvFlavour" value="${f.name}" ${i === 0 ? "checked" : ""}><span class="tick" aria-hidden="true">✓</span>${fimg(f, p)}<div class="fbody"><span class="fname">${f.name}</span></div>`;
